@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tomate El Tiempo — Evolución del Proyecto | Explicación por Félix</title>
+
+  <!-- Google Fonts: Outfit & Roboto + JetBrains Mono para prompts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Google Material Symbols Outlined (Material Design 3 Icons) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Outfit', 'sans-serif'],
+            sans: ['Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            // Paleta estricta solicitada: Negro, Rojo muy saturado, Rojo menos saturado, Amarillo
+            mdBg: '#0D0D0F',
+            mdSurface: '#16161B',
+            mdSurfaceHigh: '#1F1F26',
+            mdSurfaceHighest: '#292932',
+            redVivid: '#FF1744',      // Rojo muy saturado
+            redVividDark: '#C4001D',
+            redMuted: '#C95B63',      // Rojo no tan saturado (coral/terracota)
+            redMutedSurface: '#2D191C',
+            yellowVibrant: '#FFD600', // Amarillo vibrante
+            yellowSoft: '#FFE57F',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --md-bg: #0D0D0F;
+      --md-surface: #16161B;
+      --md-surface-high: #1F1F26;
+      --red-vivid: #FF1744;
+      --red-muted: #C95B63;
+      --yellow-vibrant: #FFD600;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--md-bg);
+      color: #F4F4F6;
+      font-family: 'Roboto', sans-serif;
+      user-select: none;
+    }
+
+    /* Permitir selección de texto en los bloques de prompts */
+    .selectable-text {
+      user-select: text;
+    }
+
+    /* Carrusel Horizontal de las 5 Partes */
+    #horizontal-track {
+      display: flex;
+      width: 500vw;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .part-slide {
+      width: 100vw;
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Pista Vertical de las 3 Subsecciones dentro de cada Parte */
+    .vertical-track {
+      width: 100%;
+      height: 300%;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .sub-section {
+      width: 100%;
+      height: 33.3333%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 76px 16px 68px 16px;
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .sub-section {
+        padding: 84px 72px 72px 72px;
+      }
+    }
+
+    /* Animación de entrada/cambio en cada subdivisión */
+    .sub-card {
+      opacity: 0.25;
+      transform: translateY(34px) scale(0.95);
+      filter: blur(3px);
+      transition:
+        opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.55s ease,
+        border-color 0.4s ease,
+        box-shadow 0.4s ease;
+    }
+
+    .sub-section.active-sub .sub-card {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    /* Animación escalonada de hijos internos al entrar en la subsección */
+    .sub-section.active-sub .stagger-1 {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+    }
+    .sub-section.active-sub .stagger-2 {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+    }
+    .sub-section.active-sub .stagger-3 {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.24s both;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Custom Scrollbar MD3 para contenedores internos de texto largo */
+    .md3-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .md3-scroll::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 999px;
+    }
+    .md3-scroll::-webkit-scrollbar-thumb {
+      background: var(--red-muted);
+      border-radius: 999px;
+    }
+    .md3-scroll::-webkit-scrollbar-thumb:hover {
+      background: var(--red-vivid);
+    }
+
+    /* Ocultar scrollbar en barra superior móvil */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Efecto Ripple / Elevación MD3 */
+    .md3-elevated {
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.55),
+        0 1px 3px rgba(255, 23, 68, 0.18);
+    }
+
+    .md3-card-glow {
+      box-shadow:
+        0 14px 40px -10px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(201, 91, 99, 0.28);
+    }
+
+    /* Animaciones temáticas para los Mockups */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float {
+      animation: floatSlow 3.2s ease-in-out infinite;
+    }
+
+    @keyframes mikuBounce {
+      0%, 100% { transform: rotate(-5deg) translateY(0); }
+      50% { transform: rotate(5deg) translateY(-5px); }
+    }
+    .animate-miku {
+      animation: mikuBounce 1.1s ease-in-out infinite;
+    }
+
+    @keyframes clockSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-clock-hand {
+      transform-origin: 50% 50%;
+      animation: clockSpin 12s linear infinite;
+    }
+
+    /* Pulso de indicador de transición de parte */
+    @keyframes pulseRight {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+    .animate-bounce-x {
+      animation: pulseRight 1.3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-mdBg text-white antialiased">
+
+  <!-- ===================================================================== -->
+  <!-- 1. MENÚ SUPERIOR FIJO (GOOGLE MATERIAL DESIGN 3 TOP APP BAR)          -->
+  <!-- ===================================================================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-[#121216]/95 backdrop-blur-md border-b border-redMuted/30 px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
+    
+    <!-- Marca / Logo a la izquierda -->
+    <div class="flex items-center gap-2.5 shrink-0">
+      <div class="w-10 h-10 rounded-2xl bg-redVivid/15 border border-redVivid/50 flex items-center justify-center shadow-inner">
+        <!-- SVG Tomate Estilizado -->
+        <svg class="w-6 h-6" viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="20" r="12" fill="#FF1744"/>
+          <circle cx="14" cy="16" r="3" fill="#FFD600" fill-opacity="0.45"/>
+          <path d="M18 8C16 5 12 6 11 8C14 8.5 16 9.5 18 11C20 9.5 22 8.5 25 8C24 6 20 5 18 8Z" fill="#FFD600"/>
+          <path d="M18 4V9" stroke="#FFD600" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="leading-tight">
+        <span class="font-display font-extrabold text-sm sm:text-base tracking-wide text-white block">
+          TOMATE <span class="text-yellowVibrant">EL TIEMPO</span>
+        </span>
+        <span class="text-[11px] text-redMuted font-medium hidden sm:block">
+          Bitácora de Desarrollo · 5 Partes
+        </span>
+      </div>
+    </div>
+
+    <!-- Selector de Partes (Chips MD3) -->
+    <nav aria-label="Navegación de Partes" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1">
+      <button onclick="goToPart(0)" data-part-btn="0" class="part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border">
+        <span class="w-2 h-2 rounded-full bg-current"></span>
+        <span>Parte 1</span>
+      </button>
+      <button onclick="goToPart(1)" data-part-btn="1" class="part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border">
+        <span class="w-2 h-2 rounded-full bg-current"></span>
+        <span>Parte 2</span>
+      </button>
+      <button onclick="goToPart(2)" data-part-btn="2" class="part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border">
+        <span class="w-2 h-2 rounded-full bg-current"></span>
+        <span>Parte 3</span>
+      </button>
+      <button onclick="goToPart(3)" data-part-btn="3" class="part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border">
+        <span class="w-2 h-2 rounded-full bg-current"></span>
+        <span>Parte 4</span>
+      </button>
+      <button onclick="goToPart(4)" data-part-btn="4" class="part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border">
+        <span class="w-2 h-2 rounded-full bg-current"></span>
+        <span>Parte 5</span>
+      </button>
+    </nav>
+
+    <!-- Botón MD3 hacia pomodoro.html en la misma carpeta de GitHub Pages -->
+    <a href="pomodoro.html"
+       title="Abrir la aplicación Pomodoro en pomodoro.html"
+       class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-yellowVibrant text-black font-display font-bold text-xs sm:text-sm hover:bg-yellowSoft active:scale-95 transition-all shadow-md shadow-yellowVibrant/20">
+      <span class="material-symbols-outlined text-[18px]">timer</span>
+      <span class="hidden md:inline">Ir a Pomodoro</span>
+      <span class="md:hidden">App</span>
+      <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+    </a>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- 2. FLECHAS LATERALES DE DIRECCIÓN (NAVEGACIÓN HORIZONTAL ENTRE PARTES) -->
+  <!-- ===================================================================== -->
+  <button id="prev-part-btn"
+          onclick="prevPart()"
+          aria-label="Parte anterior"
+          class="fixed left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-mdSurfaceHigh/90 hover:bg-redVivid text-white border border-redMuted/40 hover:border-redVivid flex items-center justify-center shadow-xl transition-all duration-200 active:scale-90 cursor-pointer disabled:opacity-25 disabled:pointer-events-none">
+    <span class="material-symbols-outlined text-2xl">chevron_left</span>
+  </button>
+
+  <button id="next-part-btn"
+          onclick="nextPart()"
+          aria-label="Parte siguiente"
+          class="fixed right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-mdSurfaceHigh/90 hover:bg-redVivid text-white border border-redMuted/40 hover:border-redVivid flex items-center justify-center shadow-xl transition-all duration-200 active:scale-90 cursor-pointer disabled:opacity-25 disabled:pointer-events-none">
+    <span class="material-symbols-outlined text-2xl">chevron_right</span>
+  </button>
+
+  <!-- ===================================================================== -->
+  <!-- 3. INDICADOR VERTICAL DE SUBDIVISIONES (DERECHA)                      -->
+  <!-- ===================================================================== -->
+  <aside aria-label="Subdivisiones de la parte actual"
+         class="fixed right-3 sm:right-5 bottom-20 sm:bottom-auto sm:top-[72%] z-40 flex flex-col items-center gap-2 bg-mdSurface/90 backdrop-blur-md p-2 rounded-full border border-redMuted/30 shadow-lg">
+    <button onclick="goToSub(0)" data-sub-dot="0" title="1. ¿Qué he hecho?" class="sub-dot w-3 h-3 rounded-full transition-all duration-300 cursor-pointer bg-redMuted/40"></button>
+    <button onclick="goToSub(1)" data-sub-dot="1" title="2. La imagen que he pedido" class="sub-dot w-3 h-3 rounded-full transition-all duration-300 cursor-pointer bg-redMuted/40"></button>
+    <button onclick="goToSub(2)" data-sub-dot="2" title="3. La petición que me pasó la IA" class="sub-dot w-3 h-3 rounded-full transition-all duration-300 cursor-pointer bg-redMuted/40"></button>
+  </aside>
+
+  <!-- ===================================================================== -->
+  <!-- 4. CONTENEDOR PRINCIPAL: CARRUSEL HORIZONTAL + SCROLL VERTICAL        -->
+  <!-- ===================================================================== -->
+  <main id="viewport" class="w-screen h-screen overflow-hidden relative">
+    <!-- Fondo decorativo sutil MD3 -->
+    <div class="pointer-events-none fixed inset-0 z-0 opacity-30">
+      <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-redVivid/20 blur-[120px]"></div>
+      <div class="absolute bottom-0 right-0 w-[420px] h-[420px] rounded-full bg-yellowVibrant/10 blur-[140px]"></div>
+    </div>
+
+    <div id="horizontal-track">
+      <!-- Las 5 Partes se inyectan dinámicamente con sus 3 subdivisiones cada una -->
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- 5. BARRA INFERIOR DE PROGRESO, CONTROLES Y CRÉDITO "EXPLICACIÓN POR FÉLIX" -->
+  <!-- ===================================================================== -->
+  <footer class="fixed bottom-0 left-0 right-0 z-40 bg-[#121216]/95 backdrop-blur-md border-t border-redMuted/25 px-3 sm:px-6 h-14 flex items-center justify-between gap-2 text-xs">
+    
+    <!-- Indicador de Subsección y Botones de Subir/Bajar -->
+    <div class="flex items-center gap-2">
+      <button onclick="stepVertical(-1)"
+              title="Subdivisión anterior (o Parte anterior)"
+              class="w-8 h-8 rounded-full bg-mdSurfaceHigh hover:bg-redMuted/30 border border-redMuted/30 flex items-center justify-center text-white transition active:scale-90 cursor-pointer">
+        <span class="material-symbols-outlined text-lg">keyboard_arrow_up</span>
+      </button>
+      <button onclick="stepVertical(1)"
+              title="Siguiente subdivisión (al final pasa a la siguiente Parte)"
+              class="w-8 h-8 rounded-full bg-redVivid hover:bg-redVividDark flex items-center justify-center text-white transition active:scale-90 cursor-pointer shadow">
+        <span class="material-symbols-outlined text-lg">keyboard_arrow_down</span>
+      </button>
+      <div class="hidden sm:flex items-center gap-2 ml-1">
+        <span id="footer-step-badge" class="px-2.5 py-1 rounded-full bg-redMutedSurface text-redMuted font-medium border border-redMuted/30">
+          1/3 · ¿Qué he hecho?
+        </span>
+      </div>
+    </div>
+
+    <!-- Indicador dinámico de acción (ej: "Desliza hacia abajo para pasar a la Parte 2 →") -->
+    <div id="scroll-hint" class="flex items-center gap-1.5 text-yellowVibrant font-medium truncate max-w-[46vw] sm:max-w-none">
+      <span class="material-symbols-outlined text-base">swipe_vertical</span>
+      <span id="scroll-hint-text" class="truncate">Desliza hacia abajo para leer</span>
+    </div>
+
+    <!-- Firma Final Solicitada -->
+    <div class="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full bg-mdSurfaceHigh border border-yellowVibrant/35">
+      <span class="w-2 h-2 rounded-full bg-yellowVibrant"></span>
+      <span class="font-display font-bold text-white tracking-wide text-[11px] sm:text-xs">
+        Explicación por <span class="text-yellowVibrant">Félix</span>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Toast / Snackbar MD3 para confirmar copia de prompt o cambio de parte -->
+  <div id="md3-snackbar"
+       class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-mdSurfaceHighest border border-yellowVibrant/60 text-white text-xs sm:text-sm font-medium shadow-2xl flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 translate-y-[-10px]">
+    <span class="material-symbols-outlined text-yellowVibrant text-lg">check_circle</span>
+    <span id="snackbar-msg">Copiado al portapapeles</span>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA Y DATOS COMPLETOS DE LAS 5 PARTES DEL PDF                      -->
+  <!-- ===================================================================== -->
+  <script>
+    /**
+     * Datos estructurados fielmente a partir de las 20 páginas del PDF
+     * "Que he hecho en página web.pdf".
+     * Cada parte contiene:
+     *  - Subdivisión 0: "¿Qué he hecho?"
+     *  - Subdivisión 1: "La imagen que he pedido" (Mockup SVG/HTML interactivo)
+     *  - Subdivisión 2: "La petición que me pasó la IA" (Prompt usuario + Prompt IA)
+     */
+    const PARTS_DATA = [
+      {
+        number: 1,
+        shortTitle: "Parte 1",
+        title: "Parte 1: El Primer Prototipo Pomodoro",
+        subtitle: "Reloj básico, contador de personas, 3 pestañas y paleta naranja/amarillo/negro",
+        badge: "Prototipo Inicial · V1",
+        whatIDid: {
+          summary: "Le pedimos a Gemini que redactara un prompt detallado para Claude con el objetivo de crear una primera página web funcional en un solo archivo HTML (listo para GitHub Pages) aplicando el método Pomodoro con sus funciones esenciales.",
+          highlights: [
+            { icon: "timer", title: "Temporizadores Personalizables", desc: "Tres tiempos base de 25, 5 y 15 minutos con reloj básico editable al hacer clic, círculo visual de progreso, mensaje en pantalla y alarma sonora mediante Web Audio API." },
+            { icon: "groups", title: "Contador de Personas", desc: "Botones +1 y -1 separados en Hombres y Mujeres, sin permitir valores negativos, con pluralización inteligente ('persona' si es 1, 'personas' si es distinto de 1) y guardado en localStorage." },
+            { icon: "tab", title: "3 Pestañas con Aviso", desc: "Siguiendo el ejemplo del profesor, se añadieron 3 pestañas seleccionables que muestran un mensaje emergente al cambiar entre ellas y saltan automáticamente al finalizar el tiempo." },
+            { icon: "palette", title: "Estética MD3 Inicial", desc: "Diseño basado en Material Design 3 con logotipo de tomate, imagen de fondo con opacidad controlada y una gama de colores naranja vibrante, amarillo cálido y negro." }
+          ]
+        },
+        mockupType: "part1",
+        mockupCaption: "Representación visual V1: Contadores de Hombres/Mujeres con localStorage, círculo Pomodoro en naranja/amarillo/negro y 3 pestañas.",
+        userPrompt: `hola, dame un prompt para claude para pedirle una pagina web html para ser desplegada en github pages que cumpla las siguientes peticiones: si la cantidad de personas es 1 se llama persona, sino pone personas. este numero no puede ser negativo.
+Añadir botón -1 y de más uno dividido en hombres y mujeres - Añadir contador de hombres y mujeres • Imagen de fondo • Iconos
+Usar Material design 3 para el diseño de la pagina. Con una gama de colores naranja amarilla y negra. Quiero que guarde en local o en un archivo la cantidad de personas y que al acceder nuevamente dentro de github pages se muestre la cantidad de antes de salir. Quiero que se llame la web "Tomate El tiempo" y que diseñe un logo de un tomate.
+Copiando al profe pon 3 pestañas que se pueden elegir entre ellas. Muestre un mensaje al querer cambiar de pestaña. y en cada una quiero que haya un reloj siguiendo el metodo pomodoro. Este reloj es personalizable, si clickeas en él. Al acabarse el tiempo quiero que se mueva automaticamente de pestaña. que cuando termine el temporizador inicie una alarma y un mensaje en pantalla que apague la alarma al clickar en él. Un circulo que represente el tiempo faltante hasta que suene la alarma seria bueno.`,
+        aiPrompt: `Actúa como un desarrollador web experto en diseño de interfaces y programación frontend. Por favor, escribe el código completo de una página web en un solo archivo HTML (con CSS y JavaScript integrados) optimizada para ser desplegada en GitHub Pages.
+La web debe llamarse "Tomate El tiempo" e incluir un diseño de logotipo moderno basado en un tomate.
+
+### Requisitos de Diseño y Estilo:
+1. Material Design 3 (MD3): Utiliza componentes, elevaciones, tarjetas (cards), tipografía y estilos modernos inspirados en Material Design 3.
+2. Paleta de Colores: Gama de colores inspirada en un tomate y la noche: tonos principales naranja vibrante, amarillo cálido y acentos o fondos negros / grises oscuros.
+3. Fondo e Iconos: Añade una imagen de fondo adecuada con opacidad controlada para que no afecte la lectura, e integra iconos (Material Icons o FontAwesome mediante CDN).
+
+### Funcionalidades de Conteo de Personas:
+1. Validación: El número total de personas no puede ser negativo.
+2. Pluralización inteligente: Si la cantidad es 1, muestra "persona"; si es mayor o distinta de 1, muestra "personas".
+3. Desglose: Botones de incremento (+1) y decremento (-1) separados por hombres y mujeres, además de contadores independientes para cada género y el total general.
+4. Persistencia de Datos: Guarda los datos de los contadores en localStorage para que al volver a acceder se mantengan los valores anteriores.
+
+### Estructura de Pestañas y Pomodoro:
+1. Pestañas: Crea 3 pestañas seleccionables en la interfaz. Al hacer clic para cambiar de pestaña, muestra un mensaje emergente de confirmación o aviso.
+2. Reloj Pomodoro en cada pestaña: Temporizador personalizable al hacer clic en él, con círculo de progreso visual, salto automático de pestaña al llegar a cero, alarma con Web Audio API y mensaje en pantalla que se apaga al hacer clic sobre él.
+Por favor, entrégame el código limpio, bien comentado y listo para guardar como index.html.`
+      },
+      {
+        number: 2,
+        shortTitle: "Parte 2",
+        title: "Parte 2: Originalidad y Tomates Cortados",
+        subtitle: "Sustitución del círculo por un tomate cortándose, temas de color, audio MP3 y tareas",
+        badge: "Identidad Visual · V2",
+        whatIDid: {
+          summary: "A partir del primer prototipo buscamos darle personalidad propia aprovechando el juego de palabras 'Tómate tu tiempo'. Eliminamos el contador de personas y centramos toda la experiencia en los tomates.",
+          highlights: [
+            { icon: "content_cut", title: "Tomate Siendo Cortado", desc: "Reemplazamos el círculo genérico del temporizador por una animación de un tomate que se va cortando progresivamente y desaparece por completo al acabarse el tiempo." },
+            { icon: "color_lens", title: "Selector de Temas de Tomate", desc: "Añadimos un spinner para cambiar la paleta y el color del tomate y el logo: naranja/amarillo, verde/amarillo (tomate verde) y naranja/rojo tomate." },
+            { icon: "login", title: "Información y Login Simple", desc: "Incorporamos una sección de información sobre la técnica Pomodoro (enlazando a Solstic.io) junto a un inicio de sesión con usuario 'usuario' y contraseña 'contraseña'." },
+            { icon: "checklist", title: "Audio MP3 y Gestor de Tareas FAB", desc: "Agregamos control de volumen y carga de tonos MP3, más un botón flotante abajo a la izquierda que muestra el porcentaje de tareas completadas." }
+          ]
+        },
+        mockupType: "part2",
+        mockupCaption: "Representación visual V2: Tomate cortándose según el tiempo, selector de colores de tomate, login simple y botón flotante de tareas.",
+        userPrompt: `pidele que quite el conteo de personas, que añada un icono de info que explique que es el pomodoro y vaya a esta página https://www.solstic.io/por-que-utilizar-la-tecnica-de-estudio-pomodoro-y-como-hacerlo-correctamente. que quite el circulo del temporizador. que añada una animacion de un tomate siendo cortado (cuyo corte desaparece) y que desaparezca cuando se acabó el tiempo. Añade la pestaña de info al menu. junto con un login simple que responde al usuario "usuario" y contraseña "contraseña". En este menú añade una forma de cambiar el tono de la alarma, y una forma de alterar el volumen de esta. Ademas quiero un spinner que permita elegir los colores de la web. Siendo estos naranja y amarillo como son. con tomates del mismo colores, verde y amarillo con los tomates de color similar y naranja y rojo tomate con tomates de color rojo. Este spinner cambiará la animacion de tomate siendo cortado segun el tiempo al color que ponga el spinner. Ademas de cambiar el logo y el color del tema. Tambien quiero que puedas añadir una lista de tareas a la izq. Esta se encontrará como un boton flotante abajo a la izq de la pantalla. Esta lista de tareas tiene las opciones de "añadir tarea" y "terminar tarea" y "eliminar tarea" ademas de que el boton flotante es un porcentaje de completitud que cuenta cuantas tareas han sido terminadas segun la cantidad de tareas totales que hay. este boton flotante también sigue el spinner de tema.`,
+        aiPrompt: `Resumen de instrucciones estructuradas aplicadas en la Parte 2 (evolución del prototipo):
+- Eliminar el módulo de conteo de personas (hombres/mujeres) y limpiar la interfaz principal.
+- Sustituir el círculo de progreso por una animación SVG/Canvas de un tomate siendo cortado en secciones que desaparecen hasta extinguirse al finalizar el tiempo.
+- Añadir pestaña/botón de Información en el menú con explicación de la técnica Pomodoro y enlace externo a Solstic.io.
+- Integrar un sistema de Login sencillo validando credenciales exactas: usuario "usuario" y contraseña "contraseña".
+- Añadir selector (spinner) de 3 combinaciones de color (Naranja/Amarillo, Verde/Amarillo y Naranja/Rojo Tomate) que sincroniza el tema global, el logotipo y el color del tomate animado.
+- Implementar control deslizante de volumen y selector de tono de alarma.
+- Crear un Floating Action Button (FAB) en la esquina inferior izquierda con indicador de porcentaje de tareas completadas y gestor para añadir, completar y eliminar tareas.`
+      },
+      {
+        number: 3,
+        shortTitle: "Parte 3",
+        title: "Parte 3: La Pizza (6 Porciones Antihorarias)",
+        subtitle: "Superando la limitación de colores con Pepperoni, Piña y Anchoas + MP3 propios",
+        badge: "Temática Pizza · V3",
+        whatIDid: {
+          summary: "Los tomates tenían una limitación cromática que restringía la variedad visual de la página. Por ello decidimos transformar el reloj en pizzas de distintos sabores, manteniendo el logotipo del tomate rojo fijo.",
+          highlights: [
+            { icon: "local_pizza", title: "3 Sabores de Pizza y Colores", desc: "Pizza Pepperoni (rojo y naranja), Pizza con Piña (naranja y amarillo piña) y Pizza con Anchoas (azul y amarillo). El logo superior permanece siempre como un tomate rojo." },
+            { icon: "rotate_left", title: "Consumo Antihorario en 6 Intervalos", desc: "La pizza pierde sus 6 rodajas en sentido antihorario cada 1/6 del tiempo total hasta desaparecer por completo al terminar el temporizador." },
+            { icon: "donut_large", title: "FAB Antihorario Abajo a la Izquierda", desc: "El indicador de porcentaje del botón flotante de tareas también se actualiza y avanza en sentido antihorario siguiendo la estética del reloj." },
+            { icon: "library_music", title: "Subida de Archivos MP3 Locales", desc: "Movimos el botón de Info al menú superior y permitimos que el usuario suba sus propios archivos .mp3 locales como tono personalizado de alarma." }
+          ]
+        },
+        mockupType: "part3",
+        mockupCaption: "Representación visual V3: Pizza dividida en 6 rodajas que desaparecen en sentido antihorario, tomate rojo estático en cabecera y FAB antihorario.",
+        userPrompt: `dile que quiero que cambie la ubicacion del boton de info arriba al menu. Y que quiero que cambie la animacion de un tomate siendo cortado por una pizza que pierde rodajas. Que quiero que seas capaz de agregar tus propios mp3 como tonos de llamada. y que el spinner te permita cambiar la pizza a las siguientes opciones "pizza pepperoni" donde el tema es rojo y naranja. "pizza con piña" donde el tema es naranja y del amarillo de la piña. "pizza con anchoas" donde el tema cambia a azul con amarillo. No quiero que el logo cambio según el tipo de pizza. Quiero que se quede como un tomate rojo. Quiero ademas que el porcentaje del boton flotante se mueva en sentido antihorario. Al igual que las rodajas de pizza deben de comerse en sentido antihorario de la animacion del reloj. Estas deben de desaparecer cada x tiempo. Este deberá ser la cantidad de tiempo entre 6. muchas gracias`,
+        aiPrompt: `Actúa como un desarrollador web experto en diseño de interfaces y programación frontend. Escribe el código completo de una página web en un solo archivo HTML optimizada para GitHub Pages.
+La web debe llamarse "Tomate El tiempo" y conservar siempre un logotipo estático de un tomate rojo, sin importar los cambios de tema o de pizza.
+
+### Requisitos de Diseño y Estructura General:
+1. Material Design 3 (MD3): Componentes modernos, elevaciones, tarjetas y tipografía de Material Design 3.
+2. Pestañas y Botón de Info: Sistema de pestañas navegables con mensaje emergente al cambiar entre ellas. Mueve el botón/pestaña de información directamente arriba al menú principal con enlace a Solstic.io.
+3. Login Simple: Mantén el inicio de sesión simple con usuario "usuario" y contraseña "contraseña".
+4. Personalización de Alarma y Tonos MP3: Además de controlar el volumen, permite añadir archivos MP3 locales para usarlos como tonos de alarma.
+
+### Selector de Temas (Spinner) basado en Pizzas:
+- Opción 1: "Pizza Pepperoni" -> Tema de colores rojo y naranja.
+- Opción 2: "Pizza con Piña" -> Tema de colores naranja y amarillo piña.
+- Opción 3: "Pizza con Anchoas" -> Tema de colores azul y amarillo.
+
+### Modificaciones en el Reloj Pomodoro y Animación de Pizza:
+- Sustituye la animación del tomate por una pizza que va perdiendo rodajas en sentido antihorario en 6 intervalos regulares (tiempo total / 6) hasta desaparecer por completo.
+- Lista de Tareas (FAB abajo a la izquierda): Indicador de completitud en sentido antihorario con opciones de añadir, terminar y eliminar tarea.`
+      },
+      {
+        number: 4,
+        shortTitle: "Parte 4",
+        title: "Parte 4: Idiomas, Juegos de Palabras y 'No me gusta la pizza'",
+        subtitle: "Traducción ES/EN/IT, modo concentración, modo claro/oscuro, chistes de tomate y modo minimalista",
+        badge: "Refinamiento Total · V4",
+        whatIDid: {
+          summary: "Al notar que 'tomate' en italiano es 'pomodoro', añadimos selector de idiomas, modo concentración, modo claro/oscuro con horizontes de día y noche, registro semanal de inicios de sesión y juegos de palabras.",
+          highlights: [
+            { icon: "translate", title: "Idiomas y Chistes de Tomate", desc: "Español, Inglés e Italiano traduciendo el título (TOMATE / TOMATO / POMODORO) y añadiendo chistes como 'Let's ketchup with this work', 'Vine work, have a break' y 'Buen trabajo, tómate un descanso'." },
+            { icon: "dark_mode", title: "Modo Claro/Oscuro, Registro y Gráfico", desc: "Sol/Luna en el menú, horizontes de día/noche, inversión de colores en modo oscuro, panel lateral de ajustes con registro de usuarios y gráfico semanal (Lunes a Domingo)." },
+            { icon: "center_focus_strong", title: "Modo Concentración y Pizza Margarita", desc: "Acceso directo que oculta toda la interfaz salvo el reloj hasta tocar la pantalla. Añadimos jamón a la de piña, aceitunas a anchoas, Pizza Margarita (verde) y consumo horario." },
+            { icon: "do_not_disturb_on", title: "Modo 'No me gusta la pizza'", desc: "Cambia el tema a blanco/negro, sustituye el tomate por una espiral blanca, pone un reloj clásico de 1 vuelta por minuto y reemplaza los chistes por frases serias (salvo 'Concentratti' en italiano)." }
+          ]
+        },
+        mockupType: "part4",
+        mockupCaption: "Representación visual V4: Comparativa entre los juegos de palabras con Pizza Margarita y el modo serio 'No me gusta la pizza' (espiral blanca y reloj de aguja).",
+        userPrompt: `• Agregamos idiomas (Español, Inglés, Italiano), traducción del título TOMATE -> TOMATO -> POMODORO, frase "tómate tu tiempo" debajo del reloj y Modo Concentración en el menú superior que oculta todo salvo el reloj.
+• Añadimos Modo Claro/Oscuro (sol/luna) con horizonte día/noche, panel lateral de ajustes a la derecha, registro de nuevos usuarios en localStorage y gráfico semanal de inicios de sesión (7 días).
+• Depuramos pizzas (jamón en piña, aceitunas en anchoas, nueva Pizza Margarita verde/amarillo), sentido horario y juegos de palabras: "Let's ketchup with this work" (si quedan tareas pendientes), "Buen trabajo, tómate un descanso", "Vine work, have a break" y "Ottimo Lavoro! Concentrati sul riposo".
+• Añadimos la opción "No me gusta la pizza": tema blanco/negro invertido en modo oscuro, logo de espiral blanca, reloj clásico que da una vuelta por minuto, cambio de "tómate tu tiempo" a "mídete el tiempo" y eliminación de los chistes por versiones profesionales.`,
+        aiPrompt: `Actúa como un desarrollador web experto en diseño de interfaces y programación frontend. Escribe el código completo en un solo archivo HTML optimizado para GitHub Pages, asegurando un diseño totalmente responsive.
+
+### Título, Idiomas y Header:
+1. Título Principal en MAYÚSCULAS ("TOMATE" -> "TOMATO" -> "POMODORO") con color dinámico según el tema.
+2. Logotipo: Tomate rojo por defecto; si se elige "No me gusta la pizza", cambia a una espiral blanca.
+
+### Modo Claro / Oscuro, Inversión de Colores y Concentración:
+- Icono de luna en modo oscuro y sol en modo claro. En modo oscuro el cuadrado central invierte el orden de los colores del tema.
+- Modo Concentración en menú superior: oculta toda la interfaz salvo el reloj y se desactiva al tocar la pantalla.
+- Fondo por defecto: horizonte de día en modo claro y horizonte de noche en modo oscuro (o imagen personalizada inalterable).
+
+### Selector de Temas y Modo "No me gusta la pizza":
+- Pizza Pepperoni (rojo/naranja), Pizza con Piña y Jamón (naranja/rosado), Pizza con Anchoas (azul/amarillo), Pizza Margarita (verde/amarillo claro).
+- "No me gusta la pizza": tema monocromático blanco/negro, reloj clásico de 1 vuelta por minuto, texto "mídete el tiempo", "Let's catch up to this work" y mensajes profesionales al terminar.
+
+### Reloj Único, Panel Lateral, Registro y Gráfico Semanal:
+- Temporizador único (al cambiar de pestaña se restablece el anterior), notificaciones naturales ("A descansar") y notificaciones de escritorio.
+- Panel lateral deslizable desde la derecha con registro/login en localStorage, tareas con descripción opcional y gráfico semanal de frecuencia de inicio de sesión (Lunes a Domingo).`
+      },
+      {
+        number: 5,
+        shortTitle: "Parte 5",
+        title: "Parte 5: Easter Egg Secreto 'Hatsune Miku'",
+        subtitle: "Desbloqueo con usuario 'miku' y contraseña 'secreto', tema turquesa #39C5BB, puerro y japonés",
+        badge: "Easter Egg Final · V5",
+        whatIDid: {
+          summary: "Como toque final oculto en la aplicación, programamos un Easter Egg completo dedicado a Hatsune Miku que transforma por completo la identidad visual y lingüística de la web al iniciar sesión con sus credenciales secretas.",
+          highlights: [
+            { icon: "lock_open", title: "Desbloqueo Secreto (miku / secreto)", desc: "Al iniciar sesión con el usuario 'miku' y contraseña 'secreto', aparece una notificación especial anunciando el desbloqueo del tema exclusivo de Hatsune Miku." },
+            { icon: "palette", title: "Paleta Turquesa (#39C5BB) Global", desc: "Toda la interfaz (menú superior, tarjetas, panel lateral y botón flotante) adopta el icónico azul turquesa #39C5BB combinado con blanco en modo claro o negro en modo oscuro." },
+            { icon: "language", title: "Título 'MIKU', Puerro y Japonés", desc: "El título cambia a 'MIKU', el logotipo del tomate se transforma en un puerro (negi) y se desbloquea el Japonés como cuarto idioma seleccionable en el selector." },
+            { icon: "animation", title: "Notificación 'Miku da yo' y GIF Animado", desc: "Añade la notificación 'Miku da yo' y sustituye la pizza central por una animación de Hatsune Miku que se mueve únicamente mientras el temporizador está corriendo." }
+          ]
+        },
+        mockupType: "part5",
+        mockupCaption: "Representación visual V5: Tema secreto Hatsune Miku (#39C5BB), logo de puerro (negi), selector de idioma con 日本語 (Japonés) y Miku animada.",
+        userPrompt: `quiero que si se escribe miku como nombre de usuario y contraseña (secreto) quiero que se desbloquee el tema de Hatsune miku. Al iniciar sesion con dicho usuario se ponga un mensaje que diga que se ha desbloqueado dicho tema. Donde el color de tema cambia a un azul turquesa (#39C5BB). el tono secundario es blanco. El reloj cambia por un gif de Miku. que se mueve siempre y cuando el reloj esté en movimiento. en este modo TODO cambia de color (el menú, el boton flotante). El modo oscuro cambia el color secundario del blanco por el negro. el titulo de la web se llamará Miku en vez de "tomate" y aparecerá el japones como idioma seleccionable. Y el logo será un puerro.`,
+        aiPrompt: `Actúa como un desarrollador web experto en diseño de interfaces y programación frontend. Escribe el código completo de una página web en un solo archivo HTML (con CSS y JavaScript integrados) optimizada para ser desplegada en GitHub Pages, totalmente responsive.
+
+### Tema Secreto "Hatsune Miku" (Huevo de Pascua en Autenticación):
+- Desbloqueo: Si un usuario inicia sesión con el nombre de usuario "miku" y la contraseña "secreto", se debe desbloquear y activar inmediatamente el tema exclusivo de Hatsune Miku.
+- Notificación: Al iniciar sesión correctamente con estas credenciales, muestra un mensaje especial en pantalla anunciando: "¡Has desbloqueado el tema de Hatsune Miku!" junto con el saludo "Miku da yo".
+- Paleta de Colores Miku:
+  • Color principal del tema: Azul Turquesa (#39C5BB).
+  • Color secundario en modo claro: Blanco.
+  • Color secundario en modo oscuro: Negro.
+- Cambio Global de Interfaz en este modo:
+  • TODO cambia de color según el tema activo (menú superior, tarjetas, panel lateral, botón flotante FAB, etc.).
+  • El título principal de la web cambia automáticamente de "TOMATE" a "MIKU".
+  • El logotipo principal se transforma en un puerro (negi).
+  • Se añade automáticamente el Japonés (日本語) como nuevo idioma seleccionable en el selector de idiomas (manteniendo los chistes de tomate sin romper la traducción).
+  • Animación del Reloj: Sustituye la pizza del reloj por una animación/GIF de Hatsune Miku que solo se moverá mientras el temporizador esté activo y corriendo (si se pausa, la animación se detiene).`
+      }
+    ];
+
+    /**
+     * Genera el mockup visual SVG/HTML interactivo correspondiente a "La imagen que he pedido"
+     * de cada una de las 5 partes.
+     */
+    function renderMockup(type) {
+      if (type === "part1") {
+        return `
+          <div class="w-full max-w-2xl mx-auto bg-[#121215] rounded-3xl border border-yellowVibrant/40 p-4 sm:p-6 shadow-2xl">
+            <!-- Barra simulada de la V1 -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-[#FF5722] flex items-center justify-center text-white text-xs font-bold">🍅</span>
+                <span class="font-display font-bold text-sm sm:text-base text-[#FF9800]">Tomate El tiempo</span>
+              </div>
+              <div class="flex gap-1.5 text-[11px]">
+                <span class="px-2.5 py-1 rounded-full bg-[#FF5722] text-white font-bold">25m Trabajo</span>
+                <span class="px-2.5 py-1 rounded-full bg-white/10 text-gray-300">5m Pausa</span>
+                <span class="px-2.5 py-1 rounded-full bg-white/10 text-gray-300">15m Larga</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <!-- Círculo Pomodoro Naranja/Amarillo/Negro -->
+              <div class="flex flex-col items-center justify-center bg-black/50 rounded-2xl p-4 border border-[#FF9800]/30">
+                <div class="relative w-32 h-32 flex items-center justify-center">
+                  <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="42" stroke="#2A2A32" stroke-width="8" fill="none"/>
+                    <circle cx="50" cy="50" r="42" stroke="#FFD600" stroke-width="8" stroke-dasharray="264" stroke-dashoffset="66" stroke-linecap="round" fill="none"/>
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="font-mono font-bold text-2xl text-white">18:45</span>
+                    <span class="text-[10px] text-[#FF9800] uppercase tracking-wider">Click para editar</span>
+                  </div>
+                </div>
+                <span class="mt-2 text-[11px] text-gray-400">Alarma Web Audio + Salto de pestaña</span>
+              </div>
+
+              <!-- Contador de Personas Hombres / Mujeres -->
+              <div class="bg-[#1C1C22] rounded-2xl p-4 border border-white/10 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-gray-300">Aforo (localStorage)</span>
+                  <span class="px-2.5 py-0.5 rounded-full bg-yellowVibrant/20 text-yellowVibrant text-xs font-bold">3 personas</span>
+                </div>
+                <div class="flex items-center justify-between bg-black/40 p-2.5 rounded-xl">
+                  <span class="text-xs text-gray-200 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base text-[#FF9800]">man</span> Hombres: <b>2</b>
+                  </span>
+                  <div class="flex gap-1.5">
+                    <span class="px-2 py-0.5 rounded-lg bg-redVivid/25 text-redVivid text-xs font-bold">-1</span>
+                    <span class="px-2 py-0.5 rounded-lg bg-yellowVibrant text-black text-xs font-bold">+1</span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between bg-black/40 p-2.5 rounded-xl">
+                  <span class="text-xs text-gray-200 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base text-yellowVibrant">woman</span> Mujeres: <b>1</b>
+                  </span>
+                  <div class="flex gap-1.5">
+                    <span class="px-2 py-0.5 rounded-lg bg-redVivid/25 text-redVivid text-xs font-bold">-1</span>
+                    <span class="px-2 py-0.5 rounded-lg bg-yellowVibrant text-black text-xs font-bold">+1</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === "part2") {
+        return `
+          <div class="w-full max-w-2xl mx-auto bg-[#121215] rounded-3xl border border-redVivid/50 p-4 sm:p-6 shadow-2xl relative">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-full bg-redVivid flex items-center justify-center text-white text-xs">🍅</span>
+                <span class="font-display font-bold text-sm text-white">Tomate El Tiempo</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-[11px]">
+                <span class="px-2 py-1 rounded-full bg-white/10 text-yellowVibrant flex items-center gap-1">
+                  <span class="material-symbols-outlined text-xs">info</span> Info Pomodoro
+                </span>
+                <span class="px-2 py-1 rounded-full bg-redMuted/25 text-redMuted flex items-center gap-1">
+                  <span class="material-symbols-outlined text-xs">person</span> usuario / ••••
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <!-- Tomate siendo cortado -->
+              <div class="flex flex-col items-center justify-center bg-black/50 rounded-2xl p-4 border border-redVivid/30">
+                <svg class="w-32 h-32 animate-float" viewBox="0 0 120 120">
+                  <!-- Tomate principal -->
+                  <circle cx="60" cy="64" r="42" fill="#FF1744"/>
+                  <circle cx="60" cy="64" r="34" fill="#FF5252" fill-opacity="0.35"/>
+                  <!-- Rodaja cortándose y separándose -->
+                  <path d="M60 64 L60 22 A42 42 0 0 1 98 46 Z" fill="#0D0D0F"/>
+                  <g transform="translate(8, -6)">
+                    <path d="M60 64 L60 22 A42 42 0 0 1 98 46 Z" fill="#FF1744" stroke="#FFD600" stroke-width="1.5"/>
+                  </g>
+                  <!-- Hojas verdes superiores -->
+                  <path d="M60 24 C50 14 40 18 38 24 C48 24 54 27 60 32 C66 27 72 24 82 24 C80 18 70 14 60 24 Z" fill="#4CAF50"/>
+                </svg>
+                <span class="text-xs font-mono font-bold text-yellowVibrant mt-1">14:20 · Cortando tomate...</span>
+              </div>
+
+              <!-- Spinner de Colores + Audio + FAB -->
+              <div class="space-y-3">
+                <div class="bg-[#1C1C22] p-3 rounded-2xl border border-white/10">
+                  <span class="text-[11px] text-gray-400 block mb-1.5">Spinner de Tema de Tomate:</span>
+                  <div class="flex gap-1.5 text-[11px]">
+                    <span class="px-2 py-1 rounded-lg bg-[#FF9800]/20 border border-[#FF9800] text-[#FF9800]">Naranja/Amarillo</span>
+                    <span class="px-2 py-1 rounded-lg bg-green-500/20 text-green-400">Verde</span>
+                    <span class="px-2 py-1 rounded-lg bg-redVivid text-white font-bold">Rojo Tomate</span>
+                  </div>
+                </div>
+                <div class="bg-[#1C1C22] p-3 rounded-2xl border border-white/10 flex items-center justify-between">
+                  <span class="text-xs text-gray-200 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-yellowVibrant text-base">volume_up</span> Alarma MP3
+                  </span>
+                  <div class="w-24 h-2 bg-black rounded-full overflow-hidden">
+                    <div class="w-3/4 h-full bg-yellowVibrant"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 bg-redVivid/15 border border-redVivid/40 p-2.5 rounded-2xl">
+                  <div class="w-9 h-9 rounded-full bg-redVivid text-white font-bold text-xs flex items-center justify-center shrink-0">66%</div>
+                  <div class="text-[11px] leading-tight">
+                    <b class="text-white block">FAB Tareas (Abajo Izq.)</b>
+                    <span class="text-redMuted">Añadir · Terminar · Eliminar</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === "part3") {
+        return `
+          <div class="w-full max-w-2xl mx-auto bg-[#121215] rounded-3xl border border-yellowVibrant/50 p-4 sm:p-6 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+              <div class="flex items-center gap-2">
+                <!-- Logo tomate rojo estático -->
+                <span class="w-7 h-7 rounded-full bg-redVivid flex items-center justify-center text-white text-xs shadow">🍅</span>
+                <span class="font-display font-bold text-sm text-white">Tomate El Tiempo <span class="text-[10px] text-redMuted">(Logo Fijo)</span></span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-yellowVibrant/20 text-yellowVibrant text-[11px] font-medium">
+                Info en Menú Superior ↗
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <!-- Pizza de 6 rodajas comiéndose en sentido antihorario -->
+              <div class="flex flex-col items-center justify-center bg-black/50 rounded-2xl p-4 border border-yellowVibrant/30">
+                <svg class="w-36 h-36" viewBox="0 0 120 120">
+                  <!-- Borde de masa -->
+                  <circle cx="60" cy="60" r="48" fill="#E69D45"/>
+                  <circle cx="60" cy="60" r="41" fill="#FFD600"/>
+                  <!-- 2 porciones ya comidas en sentido antihorario -->
+                  <path d="M60 60 L60 10 A50 50 0 0 0 16 35 Z" fill="#0D0D0F"/>
+                  <!-- Líneas de corte en 6 porciones -->
+                  <line x1="60" y1="12" x2="60" y2="108" stroke="#B71C1C" stroke-width="1.5"/>
+                  <line x1="18" y1="36" x2="102" y2="84" stroke="#B71C1C" stroke-width="1.5"/>
+                  <line x1="18" y1="84" x2="102" y2="36" stroke="#B71C1C" stroke-width="1.5"/>
+                  <!-- Rodajas de Pepperoni en las 4 porciones restantes -->
+                  <circle cx="76" cy="36" r="5.5" fill="#FF1744"/>
+                  <circle cx="85" cy="52" r="5" fill="#FF1744"/>
+                  <circle cx="80" cy="74" r="5.5" fill="#FF1744"/>
+                  <circle cx="66" cy="88" r="5" fill="#FF1744"/>
+                  <circle cx="44" cy="84" r="5.5" fill="#FF1744"/>
+                  <circle cx="34" cy="66" r="5" fill="#FF1744"/>
+                </svg>
+                <span class="text-[11px] text-yellowVibrant font-medium mt-1">↺ 4/6 rodajas (Antihorario cada T/6)</span>
+              </div>
+
+              <!-- Opciones del Spinner de Pizza -->
+              <div class="space-y-2.5">
+                <div class="p-2.5 rounded-xl bg-redVivid/20 border border-redVivid flex items-center justify-between">
+                  <span class="text-xs font-bold text-white">🍕 Pizza Pepperoni</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-redVivid text-white">Rojo + Naranja</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#1C1C22] border border-white/10 flex items-center justify-between">
+                  <span class="text-xs text-gray-200">🍍 Pizza con Piña</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-yellowVibrant text-black font-bold">Naranja + Amarillo</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#1C1C22] border border-white/10 flex items-center justify-between">
+                  <span class="text-xs text-gray-200">🐟 Pizza con Anchoas</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded bg-blue-500 text-white">Azul + Amarillo</span>
+                </div>
+                <div class="text-[11px] text-gray-300 bg-black/40 p-2.5 rounded-xl border border-white/5 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-yellowVibrant text-base">upload_file</span>
+                  <span>MP3 propio + FAB porcentaje <b>↺ antihorario</b></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (type === "part4") {
+        return `
+          <div class="w-full max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <!-- Tarjeta Izquierda: Modo Temático con Chistes y Margarita -->
+            <div class="bg-[#16161C] rounded-3xl border border-redVivid/50 p-4 shadow-xl flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-display font-extrabold text-sm text-redVivid">TOMATE · TOMATO · POMODORO</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 font-bold">Margarita 🌿</span>
+                </div>
+                <p class="text-[11px] text-gray-300 mb-3">Consumo horario, Modo Concentración, Claro/Oscuro (Sol/Luna) y Gráfico Semanal L-D.</p>
+              </div>
+              <div class="space-y-1.5 bg-black/50 p-3 rounded-2xl border border-yellowVibrant/30 text-[11px]">
+                <div class="text-yellowVibrant font-bold">🍅 Juegos de Palabras Activos:</div>
+                <div class="text-gray-200">🇬🇧 <i>"Let's ketchup with this work"</i></div>
+                <div class="text-gray-200">🇬🇧 <i>"Vine work, have a break."</i></div>
+                <div class="text-gray-200">🇪🇸 <i>"Buen trabajo, tómate un descanso"</i></div>
+              </div>
+            </div>
+
+            <!-- Tarjeta Derecha: Modo "No me gusta la pizza" -->
+            <div class="bg-black rounded-3xl border border-white/40 p-4 shadow-xl flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <!-- Espiral blanca sustituyendo al tomate -->
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M12 12c0-1.5 1.5-2.5 3-2 2 .6 2.8 3 1.8 4.8-1.5 2.7-5 3.3-7.4 1.6-3.3-2.3-3.8-7-1.2-10.1 3.3-3.9 9.2-4.2 12.8-.6" stroke-linecap="round"/>
+                    </svg>
+                    <span class="font-display font-bold text-sm text-white">MÍDETE EL TIEMPO</span>
+                  </div>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-white text-black font-bold">Sin Pizza</span>
+                </div>
+                <!-- Reloj clásico de 1 vuelta por minuto -->
+                <div class="flex items-center justify-center my-2">
+                  <div class="w-20 h-20 rounded-full border-2 border-white flex items-center justify-center relative bg-neutral-950">
+                    <div class="w-1.5 h-1.5 rounded-full bg-white z-10"></div>
+                    <div class="w-0.5 h-7 bg-white absolute bottom-1/2 origin-bottom animate-clock-hand"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-white/10 p-2.5 rounded-2xl text-[11px] text-gray-200">
+                <b>Modo Profesional B/N:</b> Sin chistes (<i>"Let's catch up..."</i>), salvo <i>"Concentratti"</i> en italiano.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // part5: Easter Egg Hatsune Miku
+      return `
+        <div class="w-full max-w-2xl mx-auto bg-[#0E1818] rounded-3xl border-2 border-[#39C5BB] p-4 sm:p-6 shadow-2xl relative overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#39C5BB]/30 pb-3 mb-4">
+            <div class="flex items-center gap-2">
+              <!-- Logo de Puerro (Negi) -->
+              <div class="w-8 h-8 rounded-full bg-[#39C5BB]/20 border border-[#39C5BB] flex items-center justify-center">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 19L15 10" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
+                  <path d="M14 11L19 5M14 11L20 9" stroke="#39C5BB" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="font-display font-extrabold text-base tracking-wider text-[#39C5BB]">MIKU</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#39C5BB] text-black font-bold">USER: miku</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px]">
+              <span class="px-2 py-0.5 rounded-full bg-white/10 text-white">ES · EN · IT · <b class="text-[#39C5BB]">日本語 (JP)</b></span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            <!-- Personaje estilo Chibi Miku animado junto al reloj -->
+            <div class="flex flex-col items-center justify-center bg-black/60 rounded-2xl p-4 border border-[#39C5BB]/50">
+              <svg class="w-28 h-28 animate-miku" viewBox="0 0 120 120">
+                <!-- Coletas turquesa características -->
+                <path d="M35 45 Q12 65 18 105 Q28 95 36 65 Z" fill="#39C5BB"/>
+                <path d="M85 45 Q108 65 102 105 Q92 95 84 65 Z" fill="#39C5BB"/>
+                <!-- Cabeza y flequillo -->
+                <circle cx="60" cy="54" r="24" fill="#FFE0BD"/>
+                <path d="M36 52 Q36 26 60 26 Q84 26 84 52 Q72 42 60 48 Q48 42 36 52 Z" fill="#39C5BB"/>
+                <!-- Lazos -->
+                <rect x="31" y="36" width="8" height="10" rx="2" fill="#FF1744"/>
+                <rect x="81" y="36" width="8" height="10" rx="2" fill="#FF1744"/>
+                <!-- Ojos turquesa -->
+                <circle cx="51" cy="56" r="3" fill="#39C5BB"/>
+                <circle cx="69" cy="56" r="3" fill="#39C5BB"/>
+                <path d="M56 64 Q60 68 64 64" stroke="#C95B63" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+              <span class="text-xs font-mono font-bold text-[#39C5BB] mt-1">24:59 · Animación activa</span>
+            </div>
+
+            <!-- Detalles del Easter Egg -->
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3 rounded-2xl bg-[#39C5BB]/20 border border-[#39C5BB] text-white">
+                <div class="font-bold text-[#39C5BB] flex items-center gap-1.5 mb-1">
+                  <span class="material-symbols-outlined text-base">celebration</span>
+                  Notificación Especial:
+                </div>
+                <p>"¡Has desbloqueado el tema de Hatsune Miku!" — <b>"Miku da yo"</b></p>
+              </div>
+              <div class="p-3 rounded-2xl bg-black/50 border border-white/10 text-gray-200 space-y-1">
+                <div>🎨 <b>Paleta:</b> Turquesa <code class="text-[#39C5BB]">#39C5BB</code> + Blanco / Negro</div>
+                <div>🥬 <b>Logotipo:</b> Tomate reemplazado por Puerro</div>
+                <div>⏯️ <b>Estado:</b> Solo se mueve mientras corre el reloj</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // RENDERIZADO DINÁMICO DE LAS 5 PARTES Y SUS 3 SUBDIVISIONES
+    // =========================================================================
+    const trackEl = document.getElementById("horizontal-track");
+
+    PARTS_DATA.forEach((part, pIdx) => {
+      const partSlide = document.createElement("section");
+      partSlide.className = "part-slide";
+      partSlide.dataset.partIndex = pIdx;
+
+      const highlightsHTML = part.whatIDid.highlights.map(item => `
+        <div class="bg-mdSurfaceHigh/90 hover:bg-mdSurfaceHighest border border-redMuted/25 hover:border-yellowVibrant/50 rounded-2xl p-3.5 sm:p-4 transition-all duration-300">
+          <div class="flex items-center gap-2.5 mb-1.5">
+            <div class="w-8 h-8 rounded-xl bg-redVivid/15 text-yellowVibrant flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[20px]">${item.icon}</span>
+            </div>
+            <h4 class="font-display font-bold text-sm sm:text-base text-white">${item.title}</h4>
+          </div>
+          <p class="text-xs sm:text-sm text-gray-300 leading-relaxed">${item.desc}</p>
+        </div>
+      `).join("");
+
+      partSlide.innerHTML = `
+        <div class="vertical-track" id="v-track-${pIdx}">
+          
+          <!-- =============================================================== -->
+          <!-- SUBDIVISIÓN 1 (ARRIBA): ¿QUÉ HE HECHO?                          -->
+          <!-- =============================================================== -->
+          <div class="sub-section" data-sub-index="0">
+            <div class="sub-card w-full max-w-4xl bg-mdSurface/95 backdrop-blur-md rounded-[28px] border border-redMuted/35 md3-card-glow p-5 sm:p-8 max-h-full overflow-y-auto md3-scroll">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3 stagger-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-full bg-redVivid text-white font-display font-bold text-xs tracking-wide uppercase">
+                    ${part.badge}
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-redMutedSurface text-redMuted border border-redMuted/30 text-xs font-medium">
+                    1 / 3 · ¿Qué he hecho?
+                  </span>
+                </div>
+                <span class="text-xs text-yellowVibrant font-mono">Paso ${part.number} de 5</span>
+              </div>
+
+              <h2 class="font-display font-extrabold text-xl sm:text-3xl text-white mb-2 stagger-1">
+                ${part.title}
+              </h2>
+              <p class="text-xs sm:text-sm text-redMuted font-medium mb-4 stagger-2">
+                ${part.subtitle}
+              </p>
+
+              <div class="bg-black/45 border-l-4 border-yellowVibrant rounded-r-2xl p-3.5 sm:p-4 mb-5 stagger-2">
+                <p class="text-xs sm:text-base text-gray-100 leading-relaxed">
+                  ${part.whatIDid.summary}
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 stagger-3">
+                ${highlightsHTML}
+              </div>
+            </div>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- SUBDIVISIÓN 2 (MEDIO): LA IMAGEN QUE HE PEDIDO                  -->
+          <!-- =============================================================== -->
+          <div class="sub-section" data-sub-index="1">
+            <div class="sub-card w-full max-w-4xl bg-mdSurface/95 backdrop-blur-md rounded-[28px] border border-yellowVibrant/35 md3-card-glow p-5 sm:p-8 max-h-full overflow-y-auto md3-scroll">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3 stagger-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-full bg-yellowVibrant text-black font-display font-bold text-xs tracking-wide uppercase">
+                    2 / 3 · La imagen que he pedido
+                  </span>
+                  <span class="text-xs text-redMuted font-medium hidden sm:inline">
+                    ${part.shortTitle} · Vista previa de interfaz
+                  </span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-xs text-yellowVibrant">
+                  <span class="material-symbols-outlined text-base">visibility</span> Mockup Interactivo
+                </span>
+              </div>
+
+              <h3 class="font-display font-bold text-lg sm:text-2xl text-white mb-4 stagger-1">
+                Diseño visual solicitado en ${part.shortTitle}
+              </h3>
+
+              <div class="my-2 stagger-2">
+                ${renderMockup(part.mockupType)}
+              </div>
+
+              <p class="mt-4 text-center text-xs sm:text-sm text-gray-300 bg-mdSurfaceHigh/80 py-2.5 px-4 rounded-2xl border border-redMuted/25 stagger-3">
+                <span class="text-yellowVibrant font-bold">Nota visual:</span> ${part.mockupCaption}
+              </p>
+            </div>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- SUBDIVISIÓN 3 (ABAJO): LA PETICIÓN QUE ME PASÓ LA IA            -->
+          <!-- =============================================================== -->
+          <div class="sub-section" data-sub-index="2">
+            <div class="sub-card w-full max-w-4xl bg-mdSurface/95 backdrop-blur-md rounded-[28px] border border-redVivid/45 md3-card-glow p-5 sm:p-8 max-h-full flex flex-col">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3 shrink-0 stagger-1">
+                <div class="flex items-center gap-2">
+                  <span class="px-3 py-1 rounded-full bg-redMuted text-white font-display font-bold text-xs tracking-wide uppercase">
+                    3 / 3 · La petición que me pasó la IA
+                  </span>
+                  <span class="text-xs text-gray-400 hidden sm:inline">${part.shortTitle}</span>
+                </div>
+
+                <button onclick="copyPrompt(${pIdx})"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-redVivid hover:bg-redVividDark text-white text-xs font-bold transition active:scale-95 cursor-pointer shadow">
+                  <span class="material-symbols-outlined text-base">content_copy</span>
+                  <span>Copiar Prompt IA</span>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-y-auto md3-scroll pr-1 stagger-2">
+                <!-- Bloque 1: Lo que le pedimos a Gemini -->
+                <div class="bg-black/60 rounded-2xl border border-redMuted/35 p-4 flex flex-col">
+                  <div class="flex items-center gap-2 text-redMuted font-display font-bold text-xs uppercase tracking-wider mb-2">
+                    <span class="material-symbols-outlined text-base">chat</span>
+                    1. Petición inicial a Gemini
+                  </div>
+                  <div class="text-xs text-gray-300 font-sans leading-relaxed whitespace-pre-line selectable-text overflow-y-auto md3-scroll max-h-52 sm:max-h-64 pr-1">
+                    ${part.userPrompt}
+                  </div>
+                </div>
+
+                <!-- Bloque 2: Prompt estructurado que pasó la IA para Claude -->
+                <div class="bg-[#101014] rounded-2xl border border-yellowVibrant/40 p-4 flex flex-col">
+                  <div class="flex items-center justify-between gap-2 text-yellowVibrant font-display font-bold text-xs uppercase tracking-wider mb-2">
+                    <span class="flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-base">auto_awesome</span>
+                      2. Prompt generado por la IA
+                    </span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-yellowVibrant/15 text-yellowVibrant">Claude Ready</span>
+                  </div>
+                  <div class="text-xs text-gray-100 font-mono leading-relaxed whitespace-pre-line selectable-text overflow-y-auto md3-scroll max-h-52 sm:max-h-64 pr-1">
+                    ${part.aiPrompt}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Banner inferior indicando que al seguir bajando cambia a la siguiente parte -->
+              <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs shrink-0 stagger-3">
+                <span class="text-gray-400">Fin de la ${part.shortTitle}</span>
+                ${
+                  pIdx < PARTS_DATA.length - 1
+                    ? `<button onclick="nextPart()" class="inline-flex items-center gap-1 text-yellowVibrant font-bold hover:underline cursor-pointer animate-bounce-x">
+                         <span>Sigue bajando o pulsa aquí para pasar a la Parte ${part.number + 1}</span>
+                         <span class="material-symbols-outlined text-base">arrow_forward</span>
+                       </button>`
+                    : `<span class="text-yellowVibrant font-bold">🎉 ¡Has completado las 5 Partes! · Explicación por Félix</span>`
+                }
+              </div>
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      trackEl.appendChild(partSlide);
+    });
+
+    // =========================================================================
+    // ESTADO Y CONTROL DE NAVEGACIÓN (HORIZONTAL SWIPE + VERTICAL SCROLL)
+    // =========================================================================
+    let currentPart = 0; // 0 a 4 (5 Partes)
+    let currentSub = 0;  // 0 a 2 (3 Subsecciones)
+    let isTransitioning = false;
+    const TRANSITION_LOCK_MS = 580;
+
+    const SUB_NAMES = [
+      "1/3 · ¿Qué he hecho?",
+      "2/3 · La imagen que he pedido",
+      "3/3 · La petición que me pasó la IA"
+    ];
+
+    function lockTransition() {
+      isTransitioning = true;
+      setTimeout(() => {
+        isTransitioning = false;
+      }, TRANSITION_LOCK_MS);
+    }
+
+    function updateUI() {
+      // 1. Mover pista horizontal (Swipe entre Partes)
+      trackEl.style.transform = `translateX(-${currentPart * 100}vw)`;
+
+      // 2. Mover pista vertical de la parte activa (y sincronizar las demás)
+      PARTS_DATA.forEach((_, idx) => {
+        const vTrack = document.getElementById(`v-track-${idx}`);
+        const targetSub = idx === currentPart ? currentSub : 0;
+        if (vTrack) {
+          vTrack.style.transform = `translateY(-${targetSub * 33.3333}%)`;
+        }
+
+        // Activar animaciones CSS en la subsección visible
+        const slide = trackEl.children[idx];
+        const subs = slide.querySelectorAll(".sub-section");
+        subs.forEach((sec, sIdx) => {
+          if (idx === currentPart && sIdx === currentSub) {
+            sec.classList.add("active-sub");
+          } else {
+            sec.classList.remove("active-sub");
+          }
+        });
+      });
+
+      // 3. Actualizar Chips del Menú Superior
+      document.querySelectorAll(".part-chip").forEach((btn, idx) => {
+        if (idx === currentPart) {
+          btn.className = "part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border bg-redVivid text-white border-redVivid shadow-md shadow-redVivid/30";
+        } else {
+          btn.className = "part-chip px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-1.5 cursor-pointer border bg-mdSurfaceHigh text-gray-300 border-redMuted/30 hover:border-yellowVibrant/60 hover:text-white";
+        }
+      });
+
+      // 4. Actualizar puntos laterales de subdivisión
+      document.querySelectorAll(".sub-dot").forEach((dot, idx) => {
+        if (idx === currentSub) {
+          dot.className = "sub-dot w-3.5 h-7 rounded-full transition-all duration-300 cursor-pointer bg-yellowVibrant shadow shadow-yellowVibrant/50";
+        } else {
+          dot.className = "sub-dot w-3 h-3 rounded-full transition-all duration-300 cursor-pointer bg-redMuted/40 hover:bg-redVivid";
+        }
+      });
+
+      // 5. Flechas laterales izquierda / derecha
+      document.getElementById("prev-part-btn").disabled = currentPart === 0;
+      document.getElementById("next-part-btn").disabled = currentPart === PARTS_DATA.length - 1;
+
+      // 6. Badge y texto guía inferior
+      document.getElementById("footer-step-badge").textContent = SUB_NAMES[currentSub];
+      const hintText = document.getElementById("scroll-hint-text");
+      if (currentSub < 2) {
+        hintText.textContent = "Desliza hacia abajo para siguiente subdivisión";
+      } else if (currentPart < PARTS_DATA.length - 1) {
+        hintText.textContent = `Sigue bajando para pasar a la Parte ${currentPart + 2} →`;
+      } else {
+        hintText.textContent = "Has llegado al final · Proyecto Tomate El Tiempo";
+      }
+    }
+
+    function goToPart(partIndex, subIndex = 0) {
+      if (partIndex < 0 || partIndex >= PARTS_DATA.length) return;
+      currentPart = partIndex;
+      currentSub = subIndex;
+      lockTransition();
+      updateUI();
+    }
+
+    function goToSub(subIndex) {
+      if (subIndex < 0 || subIndex > 2) return;
+      currentSub = subIndex;
+      lockTransition();
+      updateUI();
+    }
+
+    function nextPart() {
+      if (currentPart < PARTS_DATA.length - 1) {
+        goToPart(currentPart + 1, 0);
+      }
+    }
+
+    function prevPart() {
+      if (currentPart > 0) {
+        goToPart(currentPart - 1, 0);
+      }
+    }
+
+    /**
+     * Avanza o retrocede verticalmente.
+     * Regla clave solicitada:
+     * "al llegar al final y seguir deslizándote cambias de parte"
+     */
+    function stepVertical(direction) {
+      if (isTransitioning) return;
+
+      if (direction > 0) {
+        // Bajando
+        if (currentSub < 2) {
+          currentSub++;
+          lockTransition();
+          updateUI();
+        } else if (currentPart < PARTS_DATA.length - 1) {
+          // Llegó al final de la parte y sigue bajando -> Swipe a la siguiente parte
+          goToPart(currentPart + 1, 0);
+        }
+      } else if (direction < 0) {
+        // Subiendo
+        if (currentSub > 0) {
+          currentSub--;
+          lockTransition();
+          updateUI();
+        } else if (currentPart > 0) {
+          // Está arriba del todo y sube -> Vuelve al final de la parte anterior
+          goToPart(currentPart - 1, 2);
+        }
+      }
+    }
+
+    // =========================================================================
+    // DETECCIÓN DE RUEDA DEL RATÓN (RESPETANDO SCROLL INTERNO DE PROMPTS)
+    // =========================================================================
+    function canElementScroll(target, deltaY) {
+      let el = target;
+      while (el && el !== document.body) {
+        if (el.classList && el.classList.contains("md3-scroll")) {
+          const isScrollable = el.scrollHeight > el.clientHeight + 2;
+          if (isScrollable) {
+            if (deltaY > 0 && el.scrollTop + el.clientHeight < el.scrollHeight - 2) {
+              return true; // Aún queda texto por bajar dentro de la tarjeta
+            }
+            if (deltaY < 0 && el.scrollTop > 2) {
+              return true; // Aún queda texto por subir dentro de la tarjeta
+            }
+          }
+        }
+        el = el.parentElement;
+      }
+      return false;
+    }
+
+    window.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaY) < 18 && Math.abs(e.deltaX) < 18) return;
+
+      // Si el usuario hace scroll horizontal con trackpad
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 30) {
+        if (isTransitioning) return;
+        if (e.deltaX > 0) nextPart();
+        else prevPart();
+        return;
+      }
+
+      // Si está leyendo dentro de un bloque con scroll interno, permitirlo hasta llegar al borde
+      if (canElementScroll(e.target, e.deltaY)) return;
+
+      if (e.deltaY > 0) {
+        stepVertical(1);
+      } else if (e.deltaY < 0) {
+        stepVertical(-1);
+      }
+    }, { passive: true });
+
+    // =========================================================================
+    // DETECCIÓN DE GESTOS TÁCTILES (SWIPE HORIZONTAL Y VERTICAL)
+    // =========================================================================
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchTarget = null;
+
+    window.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchTarget = e.target;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchend", (e) => {
+      if (e.changedTouches.length !== 1) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+
+      if (Math.abs(dx) < 42 && Math.abs(dy) < 42) return;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        // Swipe horizontal -> Cambiar de Parte
+        if (dx < 0) nextPart();
+        else prevPart();
+      } else {
+        // Swipe vertical -> Cambiar de subdivisión (o de parte si está al final)
+        const deltaY = -dy; // dedo hacia arriba = bajar página
+        if (canElementScroll(touchTarget, deltaY)) return;
+        if (dy < 0) stepVertical(1);
+        else stepVertical(-1);
+      }
+    }, { passive: true });
+
+    // =========================================================================
+    // NAVEGACIÓN POR TECLADO (FLECHAS IZQUIERDA, DERECHA, ARRIBA, ABAJO)
+    // =========================================================================
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") {
+        nextPart();
+      } else if (e.key === "ArrowLeft") {
+        prevPart();
+      } else if (e.key === "ArrowDown" || e.key === "PageDown") {
+        stepVertical(1);
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        stepVertical(-1);
+      }
+    });
+
+    // =========================================================================
+    // COPIAR PROMPT AL PORTAPAPELES + SNACKBAR MD3
+    // =========================================================================
+    function copyPrompt(partIdx) {
+      const text = PARTS_DATA[partIdx].aiPrompt;
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        showSnackbar(`Prompt de ${PARTS_DATA[partIdx].shortTitle} copiado`);
+      } catch (err) {
+        showSnackbar("No se pudo copiar el texto");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    let snackbarTimeout;
+    function showSnackbar(message) {
+      const bar = document.getElementById("md3-snackbar");
+      const msgEl = document.getElementById("snackbar-msg");
+      msgEl.textContent = message;
+      bar.classList.remove("opacity-0", "translate-y-[-10px]");
+      bar.classList.add("opacity-100", "translate-y-0");
+
+      clearTimeout(snackbarTimeout);
+      snackbarTimeout = setTimeout(() => {
+        bar.classList.add("opacity-0", "translate-y-[-10px]");
+        bar.classList.remove("opacity-100", "translate-y-0");
+      }, 2400);
+    }
+
+    // Inicializar interfaz en Parte 1, Subsección 1
+    updateUI();
+  </script>
+</body>
+</html>
