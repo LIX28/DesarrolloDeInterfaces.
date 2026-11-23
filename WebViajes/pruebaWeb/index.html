@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conoce República Dominicana</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;800&amp;family=Instrument+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || 'light'; document.documentElement.dataset.palette = localStorage.getItem('palette') || 'red';</script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="inicio">
+  <header id="topbar">
+    <button id="burger" type="button" aria-label="Abrir menú">☰</button>
+    <ul id="menu">
+      <li><button type="button" class="logo" id="logo" aria-label="Cambiar colores de la página (rojo / azul)" title="Cambiar colores"><span class="flag"></span></button></li>
+      <li><a href="index.html" data-nav="inicio">Inicio</a></li>
+      <li><a href="conoce.html" data-nav="conoce">Conoce RD</a></li>
+      <li><a href="planifica.html" data-nav="planifica">Planifica</a></li>
+      <li><a href="https://www.booking.com/flights/" target="_blank" rel="noopener">Planea tu vuelo</a></li>
+    </ul>
+    <button id="theme" type="button" aria-label="Cambiar tema">🌙</button>
+  </header>
+  <div id="scrim"></div>
+
+  <main>
+    <section class="hero-banner">
+      <img class="hero-img" src="./imagen/puntacana.jpg" alt="Playa de Punta Cana, República Dominicana" fetchpriority="high">
+      <h1 class="hero-title">Conoce República Dominicana.</h1>
+    </section>
+    <p class="hero-intro">Donde el Caribe huele a café recién colado, el merengue sale por las ventanas y cada esquina colonial guarda quinientos años de historia.</p>
+
+    <div class="wrap" id="inicio-pois-wrap" hidden>
+      <h2 class="conoce">Conoce su <a href="conoce.html" class="rot" id="rot"></a></h2>
+      <div id="previews"></div>
+    </div>
+  </main>
+
+  <footer>© República Dominicana · Guía de viaje</footer>
+</body>
+</html>

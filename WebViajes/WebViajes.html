@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitácora de Desarrollo: Conoce República Dominicana</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter y JetBrains Mono para los prompts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Font Awesome para iconografía limpia -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* Variables cromáticas exactas del proyecto */
+    :root {
+      --color-1: #C8102E; /* Rojo */
+      --color-2: #1F4E9C; /* Azul */
+      --color-3: #F5F3EE; /* Blanco/Beige claro */
+      --color-4: #EEB7C0; /* Rosa */
+      --color-5: #2B2B2B; /* Oscuro */
+      --color-6: #8FA6CE; /* Azul claro */
+
+      /* Variables dinámicas de tema */
+      --primary: var(--color-1);
+      --secondary: var(--color-2);
+      --bg-main: var(--color-3);
+      --bg-card: #FFFFFF;
+      --text-main: var(--color-5);
+      --text-muted: #525252;
+      --accent-soft: var(--color-4);
+      --border-color: rgba(43, 43, 43, 0.12);
+    }
+
+    /* Modo Oscuro */
+    body.dark-mode {
+      --bg-main: #1E1E22;
+      --bg-card: var(--color-5);
+      --text-main: #F5F3EE;
+      --text-muted: #B8B8C0;
+      --border-color: rgba(245, 243, 238, 0.14);
+    }
+
+    /* Easter Egg / Cambio de tono al pulsar el logo (Intercambio Rojo <-> Azul) */
+    body.swapped-theme {
+      --primary: var(--color-2);
+      --secondary: var(--color-1);
+      --accent-soft: var(--color-6);
+    }
+
+    * {
+      box-sizing: border-box;
+      transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Estilos de transición de diapositivas */
+    .slide {
+      display: none;
+      animation: slideFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Barra de desplazamiento elegante para prompts largos */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.08);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 9999px;
+    }
+
+    /* Estilo del botón interactivo del logo (guiño al proyecto) */
+    .rd-logo-btn {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .rd-logo-btn:hover {
+      transform: scale(1.06);
+    }
+    .rd-logo-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-[#C8102E] selection:text-white">
+
+  <!-- Barra Superior de Navegación / Header -->
+  <header id="top-bar" style="background-color: var(--primary);" class="w-full text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <!-- Izquierda: Identificador y subtítulo -->
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+          Bitácora IA
+        </span>
+        <span class="hidden sm:inline-block font-semibold text-sm md:text-base tracking-tight">
+          Proyecto: Conoce República Dominicana
+        </span>
+      </div>
+
+      <!-- Centro: Logo interactivo (cambia tonos Rojo <-> Azul como en el proyecto) -->
+      <button id="logo-swap-btn" title="Pulsa el logo para intercambiar los tonos Rojo / Azul (Feature del proyecto)" class="rd-logo-btn flex items-center gap-2 bg-white text-[#2B2B2B] px-3 py-1.5 rounded-full shadow-sm font-bold text-xs sm:text-sm cursor-pointer">
+        <!-- SVG Bandera República Dominicana simplificada -->
+        <svg class="w-5 h-3.5 rounded-xs shadow-xs shrink-0" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+          <rect width="30" height="20" fill="#FFFFFF"/>
+          <rect x="0" y="0" width="13" height="8" fill="#1F4E9C"/>
+          <rect x="17" y="0" width="13" height="8" fill="#C8102E"/>
+          <rect x="0" y="12" width="13" height="8" fill="#C8102E"/>
+          <rect x="17" y="12" width="13" height="8" fill="#1F4E9C"/>
+          <circle cx="15" cy="10" r="1.5" fill="#2E7D32"/>
+        </svg>
+        <span>RD Web</span>
+      </button>
+
+      <!-- Derecha: Contador de diapositivas + Toggle Modo Claro/Oscuro -->
+      <div class="flex items-center gap-3">
+        <span id="slide-counter-top" class="text-xs sm:text-sm font-medium bg-black/20 px-3 py-1 rounded-full">
+          1 / 8
+        </span>
+        <button id="theme-toggle-btn" title="Alternar Modo Claro / Oscuro" class="w-9 h-9 rounded-full bg-white text-[#2B2B2B] flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer" aria-label="Cambiar tema">
+          <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de progreso lineal -->
+    <div class="w-full h-1 bg-black/20">
+      <div id="progress-bar" class="h-full bg-white transition-all duration-300 ease-out" style="width: 12.5%;"></div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal de Diapositivas -->
+  <main class="flex-1 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8">
+    <div class="w-full max-w-5xl">
+
+      <!-- =========================================================
+           DIAPOSITIVA 1: PORTADA
+      ========================================================== -->
+      <section class="slide active flex-col justify-center items-center text-center rounded-3xl p-6 sm:p-12 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style="background-color: var(--accent-soft); color: #2B2B2B;">
+          <i class="fa-solid fa-layer-group"></i> Proceso de Desarrollo Paso a Paso
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 leading-tight" style="color: var(--primary);">
+          Desarrollo Web: Conoce República Dominicana
+        </h1>
+
+        <p class="text-base sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed" style="color: var(--text-muted);">
+          Documentación interactiva del flujo de trabajo colaborativo entre <strong style="color: var(--secondary);">Gemini</strong> y <strong style="color: var(--primary);">Claude</strong> para crear una aplicación web de viajes estática, escalable mediante <code class="px-1.5 py-0.5 rounded bg-black/10 font-mono-code text-sm">data.json</code> y desplegada en GitHub Pages.
+        </p>
+
+        <!-- Tarjetas resumen de arquitectura -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl mb-8 text-left">
+          <div class="p-4 rounded-2xl border" style="border-color: var(--border-color); background-color: var(--bg-main);">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white mb-3" style="background-color: var(--color-1);">
+              <i class="fa-solid fa-database"></i>
+            </div>
+            <h3 class="font-bold text-sm mb-1">JSON Escalable</h3>
+            <p class="text-xs leading-relaxed" style="color: var(--text-muted);">Gestión centralizada de Puntos de Interés (POI), eventos e imágenes sin subcarpetas.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl border" style="border-color: var(--border-color); background-color: var(--bg-main);">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white mb-3" style="background-color: var(--color-2);">
+              <i class="fa-solid fa-robot"></i>
+            </div>
+            <h3 class="font-bold text-sm mb-1">Sinergia Gemini + Claude</h3>
+            <p class="text-xs leading-relaxed" style="color: var(--text-muted);">Ideación y generación de prompt maestro en Gemini, iteración de código en Claude y resolución final en Gemini.</p>
+          </div>
+
+          <div class="p-4 rounded-2xl border" style="border-color: var(--border-color); background-color: var(--bg-main);">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white mb-3" style="background-color: var(--color-5);">
+              <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+            <h3 class="font-bold text-sm mb-1">Mapas y Favoritos</h3>
+            <p class="text-xs leading-relaxed" style="color: var(--text-muted);">Migración de Google Maps a Leaflet + OpenStreetMap con filtros por etiquetas y favoritos.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 text-xs" style="color: var(--text-muted);">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-keyboard"></i> Usa las flechas <kbd class="px-2 py-0.5 rounded border font-mono-code">←</kbd> <kbd class="px-2 py-0.5 rounded border font-mono-code">→</kbd> para navegar</span>
+          <span>•</span>
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles"></i> Pulsa el logo superior para probar el cambio de paleta</span>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 2: FASE 1 - IDEACIÓN Y PROMPT MAESTRO (GEMINI)
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <!-- Cabecera de diapositiva -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--secondary);">FASE 1</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Ideación y Generación del Prompt Maestro</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300">
+            <i class="fa-solid fa-sparkles mr-1"></i> Herramienta: Gemini
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--primary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--primary);">
+            <i class="fa-solid fa-lightbulb"></i> Explicación del proceso (Contexto)
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Primero se planifica la arquitectura de la web y cómo debe funcionar. Siguiendo la metodología de prácticas anteriores, se solicita ayuda a <strong>Gemini</strong> para redactar un prompt completo y estructurado que posteriormente se entregará a <strong>Claude</strong>. El requisito fundamental es gestionar todos los Puntos de Interés (POI) mediante un archivo <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">data.json</code> escalable, donde cada POI pueda tener de <strong>0 a N imágenes</strong> ubicadas directamente en una carpeta raíz <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">imagen/</code> (sin subcarpetas) para simplificar las rutas del <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">fetch()</code> en GitHub Pages.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner flex flex-col" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt inicial a Gemini + Prompt Maestro generado</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleFullMasterPrompt()" id="toggle-master-btn" class="text-xs px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white transition cursor-pointer">
+                <i class="fa-solid fa-expand mr-1"></i> Ver prompt completo
+              </button>
+              <button onclick="copyPrompt('prompt-2')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+                <i class="fa-regular fa-copy mr-1"></i> Copiar
+              </button>
+            </div>
+          </div>
+
+          <div id="prompt-2-container" class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed max-h-60 overflow-y-auto custom-scrollbar transition-all duration-300">
+            <div id="prompt-2">
+              <p class="text-amber-300 font-semibold mb-2">// 1. Petición inicial enviada a Gemini:</p>
+              <p class="mb-4 text-zinc-200">"Hola, puedes, usando este documento, crear un prompt que pasarle a claude para crear una página web? La página va a ser desplegada en github pages. Quiero que controle un .json para añadir dentro de este los diferentes Puntos de Interes (POI) dentro suya. Este .json debe ser facilmente escalable. Y que la cantidad de Imagenes pueda ir desde 0 a la que se quiera. El .json hará referencia a imagenes dentro de una carpeta llamada imagen. No introduciré las imagenes dentro de otras subcarpetas dentro para facilitar el fetch de los datos del .json."</p>
+
+              <p class="text-emerald-400 font-semibold mb-2">// 2. Prompt Maestro generado por Gemini para Claude:</p>
+              <p class="text-zinc-300 mb-2"><strong>Rol:</strong> Actúa como un desarrollador web experto en frontend (HTML5, CSS3 y JavaScript moderno) y experto en despliegues en GitHub Pages. Diseña y desarrolla el código completo para una página web de viajes interactiva basada en la República Dominicana, estructurada en múltiples vistas y totalmente responsive.</p>
+              <ul class="list-disc pl-5 space-y-1.5 text-zinc-300">
+                <li><strong>Gestión de Datos:</strong> Archivo <span class="text-white">data.json</span> externo consumido con <span class="text-white">fetch()</span>, escalable, con 0 a N imágenes en carpeta raíz <span class="text-white">imagen/</span> (ej. <span class="text-white">"imagen/punto1.jpg"</span>) sin subcarpetas.</li>
+                <li><strong>Gama Cromática obligatoria:</strong> <span class="text-rose-400">--color-1: #C8102E</span> (Rojo), <span class="text-blue-400">--color-2: #1F4E9C</span> (Azul), <span class="text-stone-200">--color-3: #F5F3EE</span> (Beige claro), <span class="text-pink-300">--color-4: #EEB7C0</span> (Rosa raro), <span class="text-zinc-400">--color-5: #2B2B2B</span> (Oscuro) y <span class="text-sky-300">#8FA6CE</span> (Azul claro). Modo claro/oscuro suave.</li>
+                <li><strong>Navegación:</strong> Menú horizontal en PC (oculto en Inicio hasta hacer scroll tras la cabecera, con logo centrado y opciones repartidas a los lados) y menú hamburguesa lateral en móvil.</li>
+                <li><strong>Vistas:</strong> 1) <em>Inicio</em> (introducción con bandera en el texto "Conoce República Dominicana", preview de 4 POI y texto dinámico "conoce su..." que rota cada 30s); 2) <em>Conoce RD</em> (tarjetas con etiquetas, Maps, galería, enlace oficial y recorte a 3 líneas con "Ver más"); 3) <em>Planifica tu viaje</em> (buscador, filtros y ruta interactiva con waypoints y hover); 4) <em>Contrata tu vuelo</em>.</li>
+                <li><strong>Easter Egg:</strong> Código Konami (↑ ↑ ↓ ↓ ← → ← → B A) en Inicio que intercambia los colores principales rojo y azul.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 3: FASE 2 - PROBLEMA DE ANIDACIÓN Y RUTAS
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--primary);">FASE 2</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Resolución de Conflictos de Rutas y Anidación</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-300">
+            <i class="fa-solid fa-folder-tree mr-1"></i> Depuración de Estructura
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--secondary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--secondary);">
+            <i class="fa-solid fa-triangle-exclamation"></i> Explicación del problema surgido
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Al generar los primeros archivos del proyecto, surgió un <strong>problema de inconsistencia en la anidación de carpetas</strong>: <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">index.html</code> buscaba la hoja de estilos en <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">./css/styles.css</code>, mientras que <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">conoce.html</code> y <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">planifica.html</code> buscaban <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">styles.css</code> directamente en la raíz, y todos apuntaban a <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">app.js</code> en la raíz en lugar de <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">js/app.js</code>. Esto provocaba que algunas vistas cargaran sin estilos. Se realizó una consulta de diagnóstico para unificar todo bajo una estructura limpia de carpetas.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT Y DIAGNÓSTICO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Consulta sobre rutas y estructura unificada</span>
+            </div>
+            <button onclick="copyPrompt('prompt-3')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div id="prompt-3" class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed space-y-3">
+            <p class="text-amber-300 font-semibold">"Estos archivos manejan la direccion styles.css y app.js o /css/styles.css y js/app.js?"</p>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs">
+              <p class="text-emerald-400 font-semibold mb-1.5">// Diagnóstico y estructura unificada resultante:</p>
+              <pre class="overflow-x-auto leading-snug text-zinc-200">
+/ (Raíz del repositorio)
+├── index.html       ──► apunta a css/styles.css y js/app.js
+├── conoce.html      ──► apunta a css/styles.css y js/app.js
+├── planifica.html   ──► apunta a css/styles.css y js/app.js
+├── data.json
+├── imagen/          ──► imágenes directas sin subcarpetas
+├── css/
+│   └── styles.css   ──► archivo único unificado
+└── js/
+    └── app.js       ──► lógica centralizada</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 4: FASE 3 - AJUSTES ESTILÍSTICOS Y PRIMEROS DATOS
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--secondary);">FASE 3</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Ajustes de Menú, Colores y Primeros Datos en JSON</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-500/15 text-orange-600 dark:text-orange-300">
+            <i class="fa-solid fa-terminal mr-1"></i> Herramienta: Claude
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--primary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--primary);">
+            <i class="fa-solid fa-paintbrush"></i> Explicación de los cambios solicitados
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Una vez resuelta la estructura de archivos, se pide directamente a <strong>Claude</strong> realizar ajustes visuales en la barra de navegación y ampliar los datos de prueba: el logo debía quedar centrado exclusivamente en la página de <em>Inicio</em>, mientras que en las demás páginas el menú debía alinearse a la izquierda. También se solicitó aplicar el rojo vibrante (<code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">#C8102E</code>) a la barra superior y añadir un nuevo POI al <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">data.json</code> (la <strong>Catedral Primada de América</strong> en Santo Domingo).
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt enviado a Claude</span>
+            </div>
+            <button onclick="copyPrompt('prompt-4')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed space-y-4">
+            <p id="prompt-4" class="text-zinc-100">
+              "haz que el logo esté en el medio solo en la página de inicio, y que en las otras dos este el menú en a la izquierda. Ademas quiero que hagas que la barra de menú sea del rojo o azul vibrante que deberia poner en el indice Además quiero que edites el data.json para hacerme otro poi más."
+            </p>
+            <div class="pt-3 border-t border-white/10 text-xs text-zinc-400 flex flex-wrap gap-2">
+              <span class="px-2 py-0.5 rounded bg-white/5 text-emerald-300">✓ Logo centrado solo en Inicio</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 text-emerald-300">✓ Barra en --color-1 (#C8102E)</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 text-emerald-300">✓ Añadida Catedral Primada de América</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 5: FASE 4 - INTERACTIVIDAD AVANZADA Y BUSCADOR
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--primary);">FASE 4</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Cambio de Tema al Pulsar Logo y Buscador con Filtros</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-orange-500/15 text-orange-600 dark:text-orange-300">
+            <i class="fa-solid fa-terminal mr-1"></i> Herramienta: Claude
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--secondary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--secondary);">
+            <i class="fa-solid fa-sliders"></i> Explicación de la evolución funcional
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Posteriormente se solicita completar las vistas restantes del menú, centrando los enlaces en <em>Inicio</em> (dos a la izquierda del logo y dos a la derecha) y haciendo accesible el cambio de paleta <strong>Rojo ↔ Azul</strong> al hacer clic sobre el logo en cualquier pestaña (manteniendo intactos los bordes de las tarjetas). Además, la vista <em>Conoce RD</em> se transforma en un <strong>scroll infinito</strong> dotado de un buscador completo capaz de filtrar por nombre, etiqueta, ciudad, categoría (evento/monumento) y, en el caso de los eventos, un filtro adicional por fecha, añadiendo un evento al <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">data.json</code> para probarlo.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt enviado a Claude</span>
+            </div>
+            <button onclick="copyPrompt('prompt-5')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed max-h-56 overflow-y-auto custom-scrollbar">
+            <p id="prompt-5" class="text-zinc-100">
+              "vale, haz que los enlaces del menú en la página principal esten centrados. Dos a la izquierda del logo otros dos a la derecha. Haz que se pueda cambiar los tonos de la página pulsando el logo, en todas las pestañas. Es decir, el rojo por el azul y el azul por el rojo. Quiero que esto sea así para los textos que haya en azul claro y rojo claro (o el rosa raro ese). Lo que no quiero que cambie es el tono de color que bordea las tarjetas. Quiero que ademas la página conoce, sea una lista sin fin de contenido, es decir, puedas ir hacia abajo en el contenido. Y haya un buscador en dicha página que filtra según las etiquetas que hay en el data.json. El buscador también permitirá buscar por nombre; filtrar por etiqueta, ciudad, y si es un evento o un monumento. Los eventos mostrarán adicional que permitirá filtrar por fecha del evento. Para probar dicho menú, porfavor edita el .json y agrega un evento."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 6: FASE 5 - MIGRACIÓN A LEAFLET + OPENSTREETMAP
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--secondary);">FASE 5</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Migración de Google Maps a Leaflet + OpenStreetMap</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300">
+            <i class="fa-solid fa-sparkles mr-1"></i> Regreso a Gemini
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--primary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--primary);">
+            <i class="fa-solid fa-map"></i> Explicación del cambio técnico
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Al agotarse el límite de uso gratuito en Claude, se retoma el desarrollo con <strong>Gemini</strong>. En la página <em>Planifica tu viaje</em> surgió un bloqueo: la integración original utilizaba la <strong>API de Google Maps</strong>, la cual exige registro previo y tarjeta de facturación para obtener una API Key funcional. Para mantener el proyecto 100% gratuito, abierto y sin dependencias de claves privadas en GitHub Pages, se decide migrar el motor de mapas a <strong>Leaflet + OpenStreetMap</strong>.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt enviado a Gemini</span>
+            </div>
+            <button onclick="copyPrompt('prompt-6')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed space-y-4">
+            <p id="prompt-6" class="text-zinc-100 text-sm sm:text-base">
+              "puedes rehacer el .js para que en vez de usar una API de google maps use un Leaflet+OpenStreetMap?"
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-white/10 text-xs">
+              <div class="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300">
+                <i class="fa-solid fa-xmark mr-1"></i> <strong>Antes:</strong> Google Maps JS API (requiere API Key y cuenta de facturación).
+              </div>
+              <div class="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+                <i class="fa-solid fa-check mr-1"></i> <strong>Después:</strong> Leaflet.js + OpenStreetMap (código abierto, sin registro y compatible con GitHub Pages).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 7: FASE 6 - FAVORITOS, SPINNER Y HAMBURGUESA
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--primary);">FASE 6</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Sistema de Favoritos, Spinner y Menú Hamburguesa</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-300">
+            <i class="fa-solid fa-sparkles mr-1"></i> Herramienta: Gemini
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--secondary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--secondary);">
+            <i class="fa-solid fa-heart"></i> Explicación de la mejora de UX y correcciones
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Inspirándose en la web de Aron para evitar saturar el mapa con demasiados POI simultáneos, se implementa la función de <strong>guardar favoritos</strong> y mostrarlos en el buscador desplegable lateral derecho de <em>Planifica tu viaje</em> (junto con el cálculo de duración del trayecto entre puntos). Además, se unifican los colores de los botones en modo claro y oscuro, se estiliza el botón de tema (blanco con luna/sol), se ocultan las tags visibles en las tarjetas, se añade un <strong>spinner (desplegable)</strong> para filtrar favoritos por etiqueta, se vincula el fondo de las tarjetas al modo activo (azul claro en modo azul / rosa en modo rojo) y se repara el menú hamburguesa móvil.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt enviado a Gemini</span>
+            </div>
+            <button onclick="copyPrompt('prompt-7')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed max-h-56 overflow-y-auto custom-scrollbar">
+            <p id="prompt-7" class="text-zinc-100">
+              "quiero que añadas la capacidad de añadir favoritos, y que los dichos se muestren en el buscador de "planiifca tu ruta" en dicha página ademas quiero que se vea una imagen, con los puntos del mapa marcados, indicando cuanto tiempo dura el trayecto. Quiero que TODOS los botones que contienenen el rosa y el azul claro en el modo oscuro, sean del mismo color en el modo claro. Quiero que el boton para cambiar de modo claro a oscuro sea de color blanco ademas de ser una luna en el oscuro y un sol en el claro. Las tags que aparecen en la página "conoce republica dominicana" y "planifica tu viaje" quiero que desaparezcan. En el modo planifica tu viaje, quiero que puedas filtrar tus favoritos haciendo usando las etiquetas que existen pero, por medio de un spinner. En cuanto a que la página sea multidispositivos, haz que el buscador sea un desplegable a la derecha de la página. Permitiendo ver el mapa, en la página "planifica tu viaje". quiero que las tarjetas en el "modo azul" (i.e. cuando el menu está azul) sean de azul claro el fondo, en vez de blanco. y viceversa (cuando este el menu rojo, el fondo de las tarjetas sea rosa). Y estos colores cambiaran al hacer click al logo como te indiqué antes. El menú de la hamburguesa no es funcional. Quiero que arregles eso."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =========================================================
+           DIAPOSITIVA 8: FASE 7 - REFINAMIENTO ESTÉTICO FINAL
+      ========================================================== -->
+      <section class="slide flex-col gap-5 rounded-3xl p-6 sm:p-8 shadow-xl border" style="background-color: var(--bg-card); border-color: var(--border-color);">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b pb-3" style="border-color: var(--border-color);">
+          <div class="flex items-center gap-2.5">
+            <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background-color: var(--secondary);">FASE 7</span>
+            <h2 class="text-lg sm:text-2xl font-bold">Refinamiento Estético de Tarjetas POI y Spinner</h2>
+          </div>
+          <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+            <i class="fa-solid fa-flag-checkered mr-1"></i> Pulido Final
+          </span>
+        </div>
+
+        <!-- PÁRRAFO SUPERIOR: EXPLICACIÓN -->
+        <div class="rounded-2xl p-4 sm:p-5 border-l-4" style="background-color: var(--bg-main); border-left-color: var(--primary);">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5" style="color: var(--primary);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Explicación del último ajuste visual
+          </div>
+          <p class="text-sm sm:text-base leading-relaxed">
+            Como toque final de diseño, se mejora la legibilidad y jerarquía visual de las tarjetas de los Puntos de Interés: se define una <strong>cabecera (header) con fondo blanco</strong> y un <strong>cuerpo (body) con el color de fondo temático</strong> y texto de descripción en <strong>color blanco</strong>. Asimismo, se limpia el texto de las opciones del selector (<code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">spinner</code>) en <em>Planifica tu viaje</em> para mostrar únicamente el nombre de la etiqueta (eliminando el prefijo <code class="font-mono-code text-xs px-1.5 py-0.5 rounded bg-black/10">"etiqueta:"</code>) y se pide localizar exactamente en qué archivo y línea editar dicho spinner.
+          </p>
+        </div>
+
+        <!-- PÁRRAFO INFERIOR: PROMPT UTILIZADO -->
+        <div class="rounded-2xl overflow-hidden border shadow-inner" style="border-color: var(--border-color); background-color: #18181B; color: #E4E4E7;">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#27272A] border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#C8102E]"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="text-xs font-mono-code text-zinc-300 ml-2">Prompt final enviado a Gemini</span>
+            </div>
+            <button onclick="copyPrompt('prompt-8')" class="text-xs px-2.5 py-1 rounded-lg bg-[#1F4E9C] hover:opacity-90 text-white transition cursor-pointer">
+              <i class="fa-regular fa-copy mr-1"></i> Copiar
+            </button>
+          </div>
+
+          <div class="p-4 sm:p-5 font-mono-code text-xs sm:text-sm leading-relaxed space-y-4">
+            <p id="prompt-8" class="text-zinc-100">
+              "haz que los pois tengan como un header cuyo fondo es color blanco. y un body cuyo fondo es el que he especificado. el color del texto de la descripción será finalmente de color blanco. Quiero que edites el spinner de "planifica tu viaje" y solo añadas el nombre de las etiquetas que hay, (ahora mismo es etiqueta:[nombre de etiqueta" quiero que lo cambies a "[nombre etiqueta]. Dime ademas donde puedo editar dicho spinner."
+            </p>
+            <div class="pt-3 border-t border-white/10 flex flex-wrap gap-2 text-xs">
+              <span class="px-2.5 py-1 rounded-md bg-white text-[#2B2B2B] font-semibold">Header POI: #FFFFFF</span>
+              <span class="px-2.5 py-1 rounded-md text-white font-semibold" style="background-color: var(--primary);">Body POI: Color temático + Texto #FFFFFF</span>
+              <span class="px-2.5 py-1 rounded-md bg-white/10 text-zinc-200">Spinner: [nombre etiqueta]</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Barra Inferior de Controles de Diapositivas -->
+  <footer class="w-full py-4 px-4 sm:px-6 border-t" style="background-color: var(--bg-card); border-color: var(--border-color);">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <!-- Botón Anterior -->
+      <button id="prev-btn" onclick="changeSlide(-1)" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 border transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:opacity-85" style="border-color: var(--border-color); background-color: var(--bg-main);">
+        <i class="fa-solid fa-arrow-left"></i> Anterior
+      </button>
+
+      <!-- Indicadores de puntos + Texto de progreso -->
+      <div class="flex flex-col items-center gap-1.5">
+        <div id="dots-container" class="flex items-center gap-2">
+          <!-- Generados dinámicamente con JS -->
+        </div>
+        <span id="slide-counter-bottom" class="text-xs font-medium" style="color: var(--text-muted);">
+          Diapositiva 1 de 8
+        </span>
+      </div>
+
+      <!-- Botón Siguiente -->
+      <button id="next-btn" onclick="changeSlide(1)" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer hover:opacity-90" style="background-color: var(--primary);">
+        Siguiente <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Notificación Toast para copiado / cambio de tema (sin usar alert()) -->
+  <div id="toast-notification" class="fixed bottom-20 right-5 z-50 px-4 py-2.5 rounded-xl text-white text-xs sm:text-sm font-medium shadow-lg transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2" style="background-color: var(--color-5);">
+    <i id="toast-icon" class="fa-solid fa-check-circle text-emerald-400"></i>
+    <span id="toast-message">Texto copiado al portapapeles</span>
+  </div>
+
+  <script>
+    // Estado global de la presentación
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const dotsContainer = document.getElementById('dots-container');
+    const counterTop = document.getElementById('slide-counter-top');
+    const counterBottom = document.getElementById('slide-counter-bottom');
+    const progressBar = document.getElementById('progress-bar');
+
+    // Inicializar indicadores de puntos
+    function initDots() {
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}`);
+        dot.className = 'h-2.5 rounded-full transition-all duration-300 cursor-pointer';
+        dot.style.width = i === currentSlide ? '24px' : '10px';
+        dot.style.backgroundColor = i === currentSlide ? 'var(--primary)' : 'rgba(128, 128, 128, 0.35)';
+        dot.onclick = () => goToSlide(i);
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    // Actualizar vista de diapositiva
+    function updateSlideUI() {
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Actualizar botones
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+      nextBtn.innerHTML = currentSlide === totalSlides - 1
+        ? 'Finalizado <i class="fa-solid fa-check"></i>'
+        : 'Siguiente <i class="fa-solid fa-arrow-right"></i>';
+
+      // Actualizar contadores y barra
+      counterTop.textContent = `${currentSlide + 1} / ${totalSlides}`;
+      counterBottom.textContent = `Diapositiva ${currentSlide + 1} de ${totalSlides}`;
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Actualizar puntos
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        dots[i].style.width = i === currentSlide ? '24px' : '10px';
+        dots[i].style.backgroundColor = i === currentSlide ? 'var(--primary)' : 'rgba(128, 128, 128, 0.35)';
+      }
+    }
+
+    function changeSlide(direction) {
+      const target = currentSlide + direction;
+      if (target >= 0 && target < totalSlides) {
+        currentSlide = target;
+        updateSlideUI();
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updateSlideUI();
+      }
+    }
+
+    // Navegación con teclado (Flechas Izquierda / Derecha)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    // Soporte para gestos táctiles (swipe horizontal en móvil)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 55) {
+        if (diff > 0) {
+          changeSlide(1); // Deslizar a la izquierda -> siguiente
+        } else {
+          changeSlide(-1); // Deslizar a la derecha -> anterior
+        }
+      }
+    }, { passive: true });
+
+    // Función para copiar prompts al portapapeles (usando execCommand para compatibilidad iframe)
+    function copyPrompt(elementId) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+
+      const textToCopy = element.innerText.trim();
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = textToCopy;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.left = '-9999px';
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+
+      try {
+        document.execCommand('copy');
+        showToast('Prompt copiado al portapapeles', 'fa-check-circle');
+      } catch (err) {
+        showToast('No se pudo copiar el texto', 'fa-circle-exclamation');
+      }
+
+      document.body.removeChild(tempTextArea);
+    }
+
+    // Expandir / contraer el prompt largo de la Diapositiva 2
+    let isMasterExpanded = false;
+    function toggleFullMasterPrompt() {
+      const container = document.getElementById('prompt-2-container');
+      const btn = document.getElementById('toggle-master-btn');
+      isMasterExpanded = !isMasterExpanded;
+
+      if (isMasterExpanded) {
+        container.classList.remove('max-h-60');
+        container.classList.add('max-h-[65vh]');
+        btn.innerHTML = '<i class="fa-solid fa-compress mr-1"></i> Contraer';
+      } else {
+        container.classList.remove('max-h-[65vh]');
+        container.classList.add('max-h-60');
+        btn.innerHTML = '<i class="fa-solid fa-expand mr-1"></i> Ver prompt completo';
+      }
+    }
+
+    // Alternar Modo Claro / Oscuro
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeIcon = document.getElementById('theme-icon');
+
+    themeToggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      themeIcon.className = isDark ? 'fa-solid fa-sun text-sm text-amber-500' : 'fa-solid fa-moon text-sm';
+      showToast(isDark ? 'Modo oscuro activado' : 'Modo claro activado', isDark ? 'fa-moon' : 'fa-sun');
+    });
+
+    // Intercambio de tonos Rojo <-> Azul al pulsar el logo (replicando la mecánica del proyecto)
+    const logoSwapBtn = document.getElementById('logo-swap-btn');
+    logoSwapBtn.addEventListener('click', () => {
+      document.body.classList.toggle('swapped-theme');
+      const isBlueMode = document.body.classList.contains('swapped-theme');
+      updateSlideUI(); // Refrescar color del punto activo
+      showToast(
+        isBlueMode ? 'Tema intercambiado: Modo Azul (#1F4E9C)' : 'Tema intercambiado: Modo Rojo (#C8102E)',
+        'fa-palette'
+      );
+    });
+
+    // Notificación Toast no intrusiva
+    let toastTimeout;
+    function showToast(message, iconClass) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.textContent = message;
+      toastIcon.className = `fa-solid ${iconClass} text-emerald-400`;
+
+      toast.classList.remove('translate-y-10', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-10', 'opacity-0');
+      }, 2400);
+    }
+
+    // Inicialización al cargar la página
+    window.onload = function () {
+      initDots();
+      updateSlideUI();
+    };
+  </script>
+</body>
+</html>
